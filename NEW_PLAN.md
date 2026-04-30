@@ -25,6 +25,13 @@ when you need transpile run
 or just ask for it - I would prefer if you ask for it
 
 
+also be aware that there is extension/modules.js
+
+which is always built from extension/modules.ts
+
+this is module wich is meant to combine all modules (bundle them) to deliver in one go to the browser context - so register there all modules you add
+
+
 
 I would like to redesign this plugin:
 

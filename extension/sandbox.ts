@@ -1,11 +1,5 @@
-/** @es.ts
-{
-    mode: "bundle",
-    extension: ".js"
-}
-@es.ts */
-import { serialize } from './encode.ts';
-import { decode } from './decode.ts';
+
+import { serialize, decode } from './modules.js';
 import type { BookmarkStored } from './types.js';
 
 const listContainer = document.getElementById('bookmark-list') as HTMLDivElement;
