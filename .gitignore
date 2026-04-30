@@ -6,3 +6,5 @@ log.log
 *.zip
 
 /coverage/
+/node.config.generated.json
+/node.config.json
