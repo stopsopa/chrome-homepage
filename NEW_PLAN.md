@@ -8,6 +8,16 @@ When it comes to layout, keep it as raw html as possible. Don't do any not reque
 Do only what requested.
 
 
+First of all always assume I have transpiler running against any *.ts file in extension directory
+
+so every *.ts file is transpiled to *.js there.
+
+example extension/encode.ts -> extension/encode.ts
+
+so always use extension/encode.js
+
+in homepage.html and sandbox.html use native esm to load these modules
+
 
 
 I would like to redesign this plugin:
@@ -50,36 +60,40 @@ It seems bookmarks allow duplicated names and urls, also it allows to have more 
 
 So let's acknowledge that this is not a limitation.
 
-Now we will store just flat list of links in "_" folder.
+Now we will store just flat list of bookmarks in "_" folder.
 
-and we will allow user to store such object in the bookmark:
+we have two methods to work with createing final name and url from any given object:
 
-```
+- extension/encode.ts
+- extension/decode.ts
 
-{
-    type: string,  - required
-    url?: string,  - optional
-    [string]?: string - optional, any other field
-}
+We will work around these two files.
 
-```
+First of all we will create sandbox for testing which can be opened by pressing CTRL+ALT+T when extension/homepage.html is loaded in the browser
 
-Where 'type' will be mandatory
+then we will load sandbox.html
 
-and will define how this particular bookmark should be interpreted and rendered.
+In sandbox let's create simple list (like classic todo list) - keep html raw.
 
-url will be optional as above.
+That list will allow us to define list of bookmarks in the "_" directory 
 
-Any other field can be defined too.
+(create "_" directory if doesn't exist)
 
-Now once user define such object. we have to have two functions to serialize and deserialize data to store in bookmark name field.
+and we can click "+" button next to the list and then on the right form will open where we have to define 'type' and optionally url, and ui will allow us to add any number of extra fields 'key' 'value' 
+and we will collect all of that and store in bookmark in "_"
 
-```
-function serialize(data: any): string
-function deserialize(data: string): any
+and when we go back to sandbox.html each bookmakr shold load on the list and on the right for each element on the list should be delete and edit button.
 
-create these as separate files in the 'extension' directory and load to the extension/homepage.html
+delete should show confirmation - use native confirm() primitive to guard this.
 
-but I will have to have tests for these two functions as well
+'edit" button should deserialise given bookmark and populate form for edit. 
+
+pressing 'save' shold replace that bookmark with edited data.
+
+if possible also save it on the same place (order wise)
+
+keep all simple, also make it also simple as possible regarding how it will communicate with browser under the hood.
+
+
 
 ```

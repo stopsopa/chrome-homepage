@@ -8,3 +8,5 @@ export type Bookmark =
       type: string;
       [key: string]: string;
     };
+
+export type BookmarkStored = { name: string; url: string };

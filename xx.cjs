@@ -35,6 +35,16 @@ EEE
       source: false,
       confirm: false,
     },
+    tsc: {
+      command: `
+set -e  
+NODE_OPTIONS="" node_modules/.bin/tsc
+
+      `,
+      description: "Transpile all .ts files",
+      source: false,
+      confirm: false,
+    },
     transpile: {
       command: `
 set -e  
