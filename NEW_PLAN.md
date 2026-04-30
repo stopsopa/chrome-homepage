@@ -1,3 +1,14 @@
+IMPORTANT: First of all don't run anything. just do what I ask and do as precisely as you can and then I will test it.
+IMPORTANT: First of all don't run anything. just do what I ask and do as precisely as you can and then I will test it.
+IMPORTANT: First of all don't run anything. just do what I ask and do as precisely as you can and then I will test it.
+
+When it comes to layout, keep it as raw html as possible. Don't do any not requested styling.
+When it comes to layout, keep it as raw html as possible. Don't do any not requested styling.
+When it comes to layout, keep it as raw html as possible. Don't do any not requested styling.
+Do only what requested.
+
+
+
 
 I would like to redesign this plugin:
 
