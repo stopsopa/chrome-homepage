@@ -1,0 +1,10 @@
+{
+  "exclude": [
+    "concurrencyCheck.ts",
+    "node-suppress-warning.js",
+    "ts-resolver.js",
+    "**/*.serial.test.*",
+    "**/*.parallel.test.*",
+    "fixtures/**/*"
+  ]
+}
