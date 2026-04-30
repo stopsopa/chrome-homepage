@@ -18,6 +18,12 @@ so always use extension/encode.js
 
 in homepage.html and sandbox.html use native esm to load these modules
 
+when you need transpile run
+
+/bin/bash build.sh
+
+or just ask for it - I would prefer if you ask for it
+
 
 
 I would like to redesign this plugin:

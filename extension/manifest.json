@@ -10,6 +10,9 @@
   "chrome_url_overrides": {
     "newtab": "homepage.html"
   },
+  "permissions": [
+    "bookmarks"
+  ],
   "icons": {
     "128": "images/icon128.png"
   }

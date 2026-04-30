@@ -2,13 +2,49 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>New Tab</title>
-    <script type="module">
-        console.log('New tab rendered locally');
-    </script>
+    <title>Sandbox</title>
+    <style>
+        body { font-family: sans-serif; display: flex; }
+        #list-container { width: 600px; border-right: 1px solid #ccc; padding: 10px; }
+        #form-container { flex-grow: 1; padding: 10px; }
+        .bookmark-item { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 5px; 
+            border-bottom: 1px solid #eee; 
+            padding: 5px; 
+        }
+        .bookmark-info { flex-grow: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-right: 10px; }
+        .bookmark-actions { flex-shrink: 0; display: flex; gap: 5px; white-space: nowrap; margin-left: auto; }
+        .drag-handle { cursor: grab; padding-right: 10px; color: #999; user-select: none; }
+        .bookmark-item.dragging { opacity: 0.5; background: #f9f9f9; }
+        .bookmark-item.drag-over-top { border-top: 2px solid #2196F3; }
+        .bookmark-item.drag-over-bottom { border-bottom: 2px solid #2196F3; }
+        .extra-field { display: flex; margin-bottom: 5px; }
+        .extra-field input { margin-right: 5px; }
+    </style>
 </head>
 <body>
-    <h1>Custom New Tab</h1>
-    <p>Page rendered locally by extension.</p>
+    <div id="list-container">
+        <h3>Bookmarks in "_" <button id="add-btn">+</button></h3>
+        <div id="bookmark-list"></div>
+    </div>
+    <div id="form-container" style="display:none;">
+        <h3 id="form-title">Add/Edit Bookmark</h3>
+        <form id="bookmark-form">
+            <div>
+                Type: <input type="text" id="type-input" required><br><br>
+                URL: <input type="text" id="url-input" placeholder="chrome://new-tab-page"><br><br>
+                Extra Fields:
+                <div id="extra-fields-container"></div>
+                <button type="button" id="add-extra-btn">Add Extra Field</button>
+            </div>
+            <br>
+            <button type="submit" id="save-btn">Save</button>
+            <button type="button" id="cancel-btn">Cancel</button>
+        </form>
+    </div>
+    <script type="module" src="sandbox.js"></script>
 </body>
 </html>

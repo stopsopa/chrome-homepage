@@ -35,6 +35,15 @@ EEE
       source: false,
       confirm: false,
     },
+    build: {
+      command: `
+set -e  
+/bin/bash build.sh
+      `,
+      description: "Build the extension",
+      source: false,
+      confirm: false,
+    },
     tsc: {
       command: `
 set -e  
