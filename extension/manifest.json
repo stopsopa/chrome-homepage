@@ -10,18 +10,11 @@
   "chrome_url_overrides": {
     "newtab": "homepage.html"
   },
-  "permissions": [
-    "bookmarks",
-    "tabs",
-    "scripting"
-  ],
-  "host_permissions": [
-    "https://gemini.google.com/*",
-    "https://chatgpt.com/*"
-  ],
+  "permissions": ["bookmarks", "tabs", "scripting"],
+  "host_permissions": ["https://gemini.google.com/*", "https://chatgpt.com/*", "https://claude.ai/*"],
   "content_scripts": [
     {
-      "matches": ["https://gemini.google.com/*", "https://chatgpt.com/*"],
+      "matches": ["https://gemini.google.com/*", "https://chatgpt.com/*", "https://claude.ai/*"],
       "js": ["content.js"],
       "run_at": "document_end"
     }
