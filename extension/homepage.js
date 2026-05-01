@@ -7,6 +7,7 @@
 import engines from "./search.js";
 console.log("Homepage script initializing...");
 const searchInput = document.getElementById("search-input");
+const searchClear = document.getElementById("search-clear");
 const enginesTop = document.getElementById("engines-top");
 const enginesBottom = document.getElementById("engines-bottom");
 const skillsList = document.getElementById("skills-list");
@@ -134,6 +135,8 @@ function resizeSearch() {
 searchInput.addEventListener("input", () => {
   resizeSearch();
   const query = searchInput.value.trim();
+  localStorage.setItem("search_query", searchInput.value);
+  searchClear.classList.toggle("hidden", !searchInput.value);
   Object.entries(engines).forEach(([id, engine]) => {
     const a = document.getElementById(`engine-${id}`);
     if (query) {
@@ -145,6 +148,14 @@ searchInput.addEventListener("input", () => {
       a.classList.remove("selected");
     }
   });
+});
+searchClear.addEventListener("click", () => {
+  searchInput.value = "";
+  localStorage.removeItem("search_query");
+  searchClear.classList.add("hidden");
+  resizeSearch();
+  searchInput.dispatchEvent(new Event("input"));
+  searchInput.focus();
 });
 searchInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
@@ -453,4 +464,10 @@ skillForm.addEventListener("submit", async (e) => {
 // Start
 initEngines();
 loadData();
+// Restore search
+const savedQuery = localStorage.getItem("search_query");
+if (savedQuery) {
+  searchInput.value = savedQuery;
+  searchClear.classList.remove("hidden");
+}
 resizeSearch();
