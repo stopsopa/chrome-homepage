@@ -3,10 +3,6 @@
   "name": "Custom New Tab Mangement v2",
   "version": "1.1",
   "description": "Renders a custom local new tab page.",
-  "action": {
-    "default_popup": "popup.html",
-    "default_title": "Set New Tab Link"
-  },
   "chrome_url_overrides": {
     "newtab": "homepage.html"
   },

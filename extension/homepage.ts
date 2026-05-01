@@ -39,13 +39,21 @@ let isEditMode = false;
 let currentFolderId: string | null = null;
 let currentEditId: string | null = null;
 let currentSkillId: string | null = null;
-let activeSkillIds = new Set<string>();
+
+// Persistence
+let activeSkillIds = new Set<string>(JSON.parse(localStorage.getItem('selected_skills') || '[]'));
+let selectedEngineIds = new Set<string>(JSON.parse(localStorage.getItem('selected_engines') || '[]'));
 
 let dragElement: HTMLElement | null = null;
 let dragStartX = 0;
 let dragStartY = 0;
 let initialX = 0;
 let initialY = 0;
+
+function savePersistence() {
+    localStorage.setItem('selected_skills', JSON.stringify(Array.from(activeSkillIds)));
+    localStorage.setItem('selected_engines', JSON.stringify(Array.from(selectedEngineIds)));
+}
 
 // Init Search Engines
 function initEngines() {
@@ -57,15 +65,21 @@ function initEngines() {
         const a = document.createElement('a');
         a.id = `engine-${id}`;
         a.className = 'engine-link disabled';
+        if (selectedEngineIds.has(id)) a.classList.add('selected');
         a.href = '';
         a.title = engine.label;
-        // Only first engine is focusable by tab
         a.tabIndex = index === 0 ? 0 : -1;
         a.innerHTML = `<img src="${engine.icon}" alt="${engine.label}">`;
         
         a.addEventListener('click', (e) => {
             e.preventDefault();
             a.classList.toggle('selected');
+            if (a.classList.contains('selected')) {
+                selectedEngineIds.add(id);
+            } else {
+                selectedEngineIds.delete(id);
+            }
+            savePersistence();
         });
 
         a.addEventListener('keydown', (e) => {
@@ -95,11 +109,9 @@ function initEngines() {
                 } else {
                     searchInput.focus();
                 }
-            } else if (e.key === 'Tab') {
-                // Let Tab handle switching sections
             } else if (e.key === ' ') {
                 e.preventDefault();
-                a.classList.toggle('selected');
+                a.click();
             } else if (e.key === 'Enter' && !e.metaKey && !e.ctrlKey) {
                 e.preventDefault();
                 handleOpen();
@@ -133,11 +145,15 @@ async function handleOpen() {
     if (activeSkillIds.size > 0) {
         const skillsData = await Promise.all(
             Array.from(activeSkillIds).map(async (id) => {
-                const [bm] = await chrome.bookmarks.get(id);
-                return decode({ name: bm.title, url: bm.url || '' }) as Bookmark;
+                try {
+                    const [bm] = await chrome.bookmarks.get(id);
+                    return decode({ name: bm.title, url: bm.url || '' }) as Bookmark;
+                } catch (e) {
+                    return null;
+                }
             })
         );
-        skillsPrompt = skillsData.map(s => s.content).filter(Boolean).join('\n\n');
+        skillsPrompt = skillsData.filter(s => s?.content).map(s => s!.content).join('\n\n');
     }
 
     const processEngine = (id: string) => {
@@ -180,7 +196,6 @@ searchInput.addEventListener('input', () => {
         } else {
             a.classList.add('disabled');
             a.href = '';
-            a.classList.remove('selected');
         }
     });
 });
@@ -267,6 +282,9 @@ async function loadData() {
 
     bookmarks.forEach(renderBookmark);
     skills.forEach((bm, i) => renderSkill(bm, i === 0));
+    
+    // Refresh disabled state for engines
+    searchInput.dispatchEvent(new Event('input'));
 }
 
 function renderBookmark(bm: any) {
@@ -317,7 +335,8 @@ function renderSkill(bm: any, isFirst: boolean) {
         } else {
             activeSkillIds.add(bm.id);
         }
-        // Save current focus
+        savePersistence();
+        
         const idx = Array.from(skillsList.children).indexOf(btn);
         loadData().then(() => {
             const nextBtn = skillsList.children[idx] as HTMLElement;
@@ -340,7 +359,6 @@ function renderSkill(bm: any, isFirst: boolean) {
     });
 
     btn.addEventListener('focus', () => {
-        // Roving tabindex
         Array.from(skillsList.children).forEach(c => (c as HTMLElement).tabIndex = -1);
         btn.tabIndex = 0;
     });
@@ -507,6 +525,7 @@ async function renderSkillsManager() {
                                 skillContent.style.height = 'auto';
                             }
                             activeSkillIds.delete(item.id);
+                            savePersistence();
                             renderSkillsManager();
                             loadData();
                         });

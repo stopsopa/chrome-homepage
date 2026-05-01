@@ -40,7 +40,6 @@ header {
 .search-container {
     flex: 1;
     max-width: 1000px;
-    height: 80px;
     position: relative;
     display: flex;
     flex-direction: column;
@@ -53,6 +52,7 @@ header {
     margin-bottom: 4px;
     font-weight: 500;
     pointer-events: none;
+    z-index: 300;
 }
 
 .search-wrapper {
@@ -60,9 +60,6 @@ header {
     flex-direction: row;
     align-items: flex-start;
     gap: 0.8rem;
-    position: absolute;
-    top: 0;
-    left: 0;
     width: 100%;
     z-index: 200;
 }
