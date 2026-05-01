@@ -140,6 +140,57 @@ var search_default = {
       return `https://www.perplexity.ai/?q=${encodeURIComponent(query)}`;
     }
   },
+  t3: {
+    position: "bottom",
+    label: "T3",
+    icon: "./icons/t3.png",
+    search: function(query) {
+      return `https://t3.chat/?q=${encodeURIComponent(query)}`;
+    },
+    detect: function(url) {
+      const prefix = "https://t3.chat";
+      const detect = url.startsWith(prefix);
+      log(`url plugin '${url}'.startsWith("${prefix}")`, detect);
+      return detect;
+    },
+    act: async function(url) {
+      await new Promise((resolve) => setTimeout(resolve, 2e3));
+      // extract prompt from url  use new URL()
+      const prompt = new URL(url).searchParams.get("q");
+      if (!prompt) {
+        log("T3.act(): no prompt");
+        return;
+      }
+      const contenteditable = document.querySelector('[id="chat-input"]');
+      if (contenteditable) {
+        log(`T3.act(): injecting prompt "${prompt}"`);
+        contenteditable.value = prompt;
+        let attempts = 0;
+        (function attempt() {
+          attempts += 1;
+          if (attempts > 5) {
+            log("T3.act(): too many attempts");
+            return;
+          }
+          if (contenteditable.value === "") {
+            log("T3.act(): empty contenteditable - stop processing");
+            return;
+          }
+          log(`T3.act(): attempt >${attempts}<`);
+          try {
+            const button = document.querySelector(`[type="submit"]`);
+            log(`T3.act(): clicking button`, button);
+            button.click();
+          } catch (e) {
+            log("T3.act(): button not found");
+          }
+          setTimeout(attempt, 1e3);
+        })();
+      } else {
+        log("T3.act(): no contenteditable");
+      }
+    }
+  },
   google: {
     position: "top",
     label: "Google",

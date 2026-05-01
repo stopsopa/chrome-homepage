@@ -11,10 +11,15 @@
     "newtab": "homepage.html"
   },
   "permissions": ["bookmarks", "tabs", "scripting"],
-  "host_permissions": ["https://gemini.google.com/*", "https://chatgpt.com/*", "https://claude.ai/*"],
+  "host_permissions": [
+    "https://gemini.google.com/*",
+    "https://chatgpt.com/*",
+    "https://claude.ai/*",
+    "https://t3.chat/*"
+  ],
   "content_scripts": [
     {
-      "matches": ["https://gemini.google.com/*", "https://chatgpt.com/*", "https://claude.ai/*"],
+      "matches": ["https://gemini.google.com/*", "https://chatgpt.com/*", "https://claude.ai/*", "https://t3.chat/*"],
       "js": ["content.js"],
       "run_at": "document_end"
     }
