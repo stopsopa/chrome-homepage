@@ -4,24 +4,27 @@
     <meta charset="utf-8">
     <title>Home</title>
     <link rel="stylesheet" href="homepage.css">
-    <script type="module" src="homepage.js"></script>
 </head>
 <body>
     <header>
         <div class="search-container">
-            <input type="text" id="search-input" placeholder="Search..." autofocus autocomplete="off">
-            <nav id="search-engines"></nav>
+            <div class="search-wrapper">
+                <input type="text" id="search-input" placeholder="Search..." autocomplete="off">
+                <div id="search-engines">
+                    <div id="engines-top" class="engine-row"></div>
+                    <div id="engines-bottom" class="engine-row"></div>
+                </div>
+            </div>
         </div>
-        <button id="edit-toggle">Edit</button>
+        <div class="header-actions">
+            <button id="add-bookmark" class="hidden">Add Link</button>
+            <button id="edit-toggle">Edit</button>
+        </div>
     </header>
 
     <main id="grid-container">
         <!-- Bookmarks will be rendered here -->
     </main>
-
-    <div id="edit-controls" class="hidden">
-        <button id="add-bookmark">Add Link</button>
-    </div>
 
     <dialog id="bookmark-dialog">
         <form id="bookmark-form" method="dialog">
@@ -46,5 +49,7 @@
             </footer>
         </form>
     </dialog>
+
+    <script type="module" src="homepage.js"></script>
 </body>
 </html>

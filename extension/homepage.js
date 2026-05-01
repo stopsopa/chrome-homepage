@@ -5,11 +5,12 @@
 }
 @es.ts */import { serialize, decode } from "./modules.js";
 import engines from "./search.js";
+console.log("Homepage script initializing...");
 const searchInput = document.getElementById("search-input");
-const enginesNav = document.getElementById("search-engines");
+const enginesTop = document.getElementById("engines-top");
+const enginesBottom = document.getElementById("engines-bottom");
 const editToggle = document.getElementById("edit-toggle");
 const gridContainer = document.getElementById("grid-container");
-const editControls = document.getElementById("edit-controls");
 const addBtn = document.getElementById("add-bookmark");
 const dialog = document.getElementById("bookmark-dialog");
 const form = document.getElementById("bookmark-form");
@@ -25,16 +26,83 @@ let initialX = 0;
 let initialY = 0;
 // Init Search Engines
 function initEngines() {
-  enginesNav.innerHTML = "";
+  enginesTop.innerHTML = "";
+  enginesBottom.innerHTML = "";
   Object.entries(engines).forEach(([id, engine]) => {
     const a = document.createElement("a");
     a.id = `engine-${id}`;
     a.className = "engine-link disabled";
     a.href = "";
     a.title = engine.label;
+    a.tabIndex = 0;
+    // Make focusable
     a.innerHTML = `<img src="${engine.icon}" alt="${engine.label}">`;
-    enginesNav.appendChild(a);
+    // Handle keyboard navigation on engines
+    a.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        a.nextElementSibling?.focus();
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        a.previousElementSibling?.focus();
+      } else if (e.key === "ArrowDown") {
+        e.preventDefault();
+        const container = a.parentElement === enginesTop ? enginesBottom : null;
+        if (container) {
+          const index = Array.from(enginesTop.children).indexOf(a);
+          const target = container.children[index] || container.lastElementChild;
+          target?.focus();
+        }
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        const container = a.parentElement === enginesBottom ? enginesTop : null;
+        if (container) {
+          const index = Array.from(enginesBottom.children).indexOf(a);
+          const target = container.children[index] || container.lastElementChild;
+          target?.focus();
+        } else {
+          searchInput.focus();
+        }
+      } else if (e.key === " ") {
+        e.preventDefault();
+        a.classList.toggle("selected");
+      } else if (e.key === "Enter") {
+        e.preventDefault();
+        handleOpen();
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        searchInput.focus();
+      }
+    });
+    const targetRow = engine.position === "bottom" ? enginesBottom : enginesTop;
+    targetRow.appendChild(a);
   });
+}
+function handleOpen() {
+  const query = searchInput.value.trim();
+  if (!query) return;
+  const selectedEngines = Array.from(document.querySelectorAll(".engine-link.selected"));
+  // If none selected, use the currently focused one if it's an engine
+  const active = document.activeElement;
+  let targetEngines = selectedEngines;
+  if (targetEngines.length === 0 && active && active.classList.contains("engine-link")) {
+    targetEngines = [active];
+  }
+  if (targetEngines.length === 0) return;
+  if (targetEngines.length === 1) {
+    // Open in current tab
+    const id = targetEngines[0].id.replace("engine-", "");
+    const engine = engines[id];
+    window.location.href = engine.search(query);
+  } else {
+    // Open in multiple tabs
+    targetEngines.forEach((el, i) => {
+      const id = el.id.replace("engine-", "");
+      const engine = engines[id];
+      const url = engine.search(query);
+      chrome.tabs.create({ url, active: false });
+    });
+  }
 }
 searchInput.addEventListener("input", () => {
   const query = searchInput.value.trim();
@@ -46,8 +114,33 @@ searchInput.addEventListener("input", () => {
     } else {
       a.classList.add("disabled");
       a.href = "";
+      a.classList.remove("selected");
     }
   });
+});
+searchInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    const query = searchInput.value.trim();
+    if (query) {
+      e.preventDefault();
+      const firstEngine = enginesTop.querySelector(".engine-link:not(.disabled)");
+      if (firstEngine) {
+        firstEngine.focus();
+      }
+    }
+  } else if (e.key === "ArrowDown") {
+    const query = searchInput.value.trim();
+    if (query) {
+      e.preventDefault();
+      const firstEngine = enginesTop.querySelector(".engine-link:not(.disabled)");
+      if (firstEngine) {
+        firstEngine.focus();
+      }
+    }
+  }
+});
+searchInput.addEventListener("click", () => {
+  // Return to typing mode
 });
 // Bookmark Management
 async function getFolder() {
@@ -130,7 +223,10 @@ function renderBookmark(bm) {
 // Drag & Drop
 function startDrag(e) {
   if (!isEditMode) return;
-  if (e.target.closest(".bookmark-actions")) return;
+  const target = e.target;
+  // Only allow dragging if clicking the icon or the icon container
+  if (!target.closest(".bookmark-icon")) return;
+  if (target.closest(".bookmark-actions")) return;
   e.preventDefault();
   dragElement = e.currentTarget;
   dragStartX = e.clientX;
@@ -171,7 +267,7 @@ editToggle.addEventListener("click", () => {
   isEditMode = !isEditMode;
   document.body.classList.toggle("edit-mode", isEditMode);
   editToggle.classList.toggle("active", isEditMode);
-  editControls.classList.toggle("hidden", !isEditMode);
+  addBtn.classList.toggle("hidden", !isEditMode);
 });
 // Dialog
 addBtn.addEventListener("click", () => {
@@ -230,4 +326,3 @@ window.addEventListener("keydown", (e) => {
 // Start
 initEngines();
 loadBookmarks();
-searchInput.focus();

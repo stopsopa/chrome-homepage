@@ -10,11 +10,13 @@ import type { BookmarkStored } from './types.js';
 
 declare const chrome: any;
 
+console.log('Homepage script initializing...');
+
 const searchInput = document.getElementById('search-input') as HTMLInputElement;
-const enginesNav = document.getElementById('search-engines') as HTMLElement;
+const enginesTop = document.getElementById('engines-top') as HTMLElement;
+const enginesBottom = document.getElementById('engines-bottom') as HTMLElement;
 const editToggle = document.getElementById('edit-toggle') as HTMLButtonElement;
 const gridContainer = document.getElementById('grid-container') as HTMLElement;
-const editControls = document.getElementById('edit-controls') as HTMLElement;
 const addBtn = document.getElementById('add-bookmark') as HTMLButtonElement;
 const dialog = document.getElementById('bookmark-dialog') as HTMLDialogElement;
 const form = document.getElementById('bookmark-form') as HTMLFormElement;
@@ -32,21 +34,96 @@ let initialY = 0;
 
 // Init Search Engines
 function initEngines() {
-    enginesNav.innerHTML = '';
-    Object.entries(engines).forEach(([id, engine]) => {
+    enginesTop.innerHTML = '';
+    enginesBottom.innerHTML = '';
+    
+    Object.entries(engines).forEach(([id, engine]: [string, any]) => {
         const a = document.createElement('a');
         a.id = `engine-${id}`;
         a.className = 'engine-link disabled';
         a.href = '';
         a.title = engine.label;
+        a.tabIndex = 0; // Make focusable
         a.innerHTML = `<img src="${engine.icon}" alt="${engine.label}">`;
-        enginesNav.appendChild(a);
+        
+        // Handle keyboard navigation on engines
+        a.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                (a.nextElementSibling as HTMLElement)?.focus();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                (a.previousElementSibling as HTMLElement)?.focus();
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                const container = a.parentElement === enginesTop ? enginesBottom : null;
+                if (container) {
+                    const index = Array.from(enginesTop.children).indexOf(a);
+                    const target = container.children[index] || container.lastElementChild;
+                    (target as HTMLElement)?.focus();
+                }
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                const container = a.parentElement === enginesBottom ? enginesTop : null;
+                if (container) {
+                    const index = Array.from(enginesBottom.children).indexOf(a);
+                    const target = container.children[index] || container.lastElementChild;
+                    (target as HTMLElement)?.focus();
+                } else {
+                    searchInput.focus();
+                }
+            } else if (e.key === ' ') {
+                e.preventDefault();
+                a.classList.toggle('selected');
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                handleOpen();
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                searchInput.focus();
+            }
+        });
+
+        const targetRow = engine.position === 'bottom' ? enginesBottom : enginesTop;
+        targetRow.appendChild(a);
     });
+}
+
+function handleOpen() {
+    const query = searchInput.value.trim();
+    if (!query) return;
+
+    const selectedEngines = Array.from(document.querySelectorAll('.engine-link.selected')) as HTMLElement[];
+    
+    // If none selected, use the currently focused one if it's an engine
+    const active = document.activeElement as HTMLElement;
+    let targetEngines = selectedEngines;
+    
+    if (targetEngines.length === 0 && active && active.classList.contains('engine-link')) {
+        targetEngines = [active];
+    }
+
+    if (targetEngines.length === 0) return;
+
+    if (targetEngines.length === 1) {
+        // Open in current tab
+        const id = targetEngines[0].id.replace('engine-', '');
+        const engine = (engines as any)[id];
+        window.location.href = engine.search(query);
+    } else {
+        // Open in multiple tabs
+        targetEngines.forEach((el, i) => {
+            const id = el.id.replace('engine-', '');
+            const engine = (engines as any)[id];
+            const url = engine.search(query);
+            chrome.tabs.create({ url, active: false });
+        });
+    }
 }
 
 searchInput.addEventListener('input', () => {
     const query = searchInput.value.trim();
-    Object.entries(engines).forEach(([id, engine]) => {
+    Object.entries(engines).forEach(([id, engine]: [string, any]) => {
         const a = document.getElementById(`engine-${id}`) as HTMLAnchorElement;
         if (query) {
             a.classList.remove('disabled');
@@ -54,8 +131,35 @@ searchInput.addEventListener('input', () => {
         } else {
             a.classList.add('disabled');
             a.href = '';
+            a.classList.remove('selected');
         }
     });
+});
+
+searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        const query = searchInput.value.trim();
+        if (query) {
+            e.preventDefault();
+            const firstEngine = enginesTop.querySelector('.engine-link:not(.disabled)') as HTMLElement;
+            if (firstEngine) {
+                firstEngine.focus();
+            }
+        }
+    } else if (e.key === 'ArrowDown') {
+        const query = searchInput.value.trim();
+        if (query) {
+            e.preventDefault();
+            const firstEngine = enginesTop.querySelector('.engine-link:not(.disabled)') as HTMLElement;
+            if (firstEngine) {
+                firstEngine.focus();
+            }
+        }
+    }
+});
+
+searchInput.addEventListener('click', () => {
+    // Return to typing mode
 });
 
 // Bookmark Management
@@ -202,7 +306,7 @@ editToggle.addEventListener('click', () => {
     isEditMode = !isEditMode;
     document.body.classList.toggle('edit-mode', isEditMode);
     editToggle.classList.toggle('active', isEditMode);
-    editControls.classList.toggle('hidden', !isEditMode);
+    addBtn.classList.toggle('hidden', !isEditMode);
 });
 
 // Dialog
@@ -272,4 +376,3 @@ window.addEventListener('keydown', (e) => {
 // Start
 initEngines();
 loadBookmarks();
-searchInput.focus();
