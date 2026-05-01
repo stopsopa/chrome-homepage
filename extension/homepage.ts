@@ -100,7 +100,7 @@ function initEngines() {
             } else if (e.key === ' ') {
                 e.preventDefault();
                 a.classList.toggle('selected');
-            } else if (e.key === 'Enter') {
+            } else if (e.key === 'Enter' && !e.metaKey && !e.ctrlKey) {
                 e.preventDefault();
                 handleOpen();
             } else if (e.key === 'Escape') {
@@ -198,9 +198,10 @@ searchClear.addEventListener('click', () => {
 window.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
+        e.stopPropagation();
         handleOpen();
     }
-});
+}, true);
 
 searchInput.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowDown' && searchInput.selectionStart === searchInput.value.length) {
@@ -288,7 +289,9 @@ function renderBookmark(bm: any) {
     `;
 
     div.addEventListener('mousedown', startDrag);
-    div.addEventListener('click', (e) => { if (isEditMode) e.preventDefault(); });
+    div.addEventListener('click', (e) => { 
+        e.preventDefault(); 
+    });
 
     div.querySelector('.btn-edit')!.addEventListener('click', (e) => {
         e.preventDefault(); e.stopPropagation(); openEdit(bm.id);
