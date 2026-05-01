@@ -132,6 +132,14 @@ var search_default = {
       }
     }
   },
+  perplexity: {
+    position: "bottom",
+    label: "Perplexity",
+    icon: "./icons/perplexity.png",
+    search: function(query) {
+      return `https://www.perplexity.ai/?q=${encodeURIComponent(query)}`;
+    }
+  },
   google: {
     position: "top",
     label: "Google",
