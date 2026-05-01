@@ -38,39 +38,45 @@ let initialY = 0;
 function initEngines() {
   enginesTop.innerHTML = "";
   enginesBottom.innerHTML = "";
-  Object.entries(engines).forEach(([id, engine]) => {
+  const allEngines = Object.entries(engines);
+  allEngines.forEach(([id, engine], index) => {
     const a = document.createElement("a");
     a.id = `engine-${id}`;
     a.className = "engine-link disabled";
     a.href = "";
     a.title = engine.label;
-    a.tabIndex = 0;
+    // Only first engine is focusable by tab
+    a.tabIndex = index === 0 ? 0 : -1;
     a.innerHTML = `<img src="${engine.icon}" alt="${engine.label}">`;
     a.addEventListener("keydown", (e) => {
       if (e.key === "ArrowRight") {
         e.preventDefault();
-        a.nextElementSibling?.focus();
+        const next = a.nextElementSibling || (a.parentElement === enginesTop ? enginesBottom.firstElementChild : null);
+        next?.focus();
       } else if (e.key === "ArrowLeft") {
         e.preventDefault();
-        a.previousElementSibling?.focus();
+        const prev = a.previousElementSibling || (a.parentElement === enginesBottom ? enginesTop.lastElementChild : null);
+        prev?.focus();
       } else if (e.key === "ArrowDown") {
         e.preventDefault();
         const container = a.parentElement === enginesTop ? enginesBottom : null;
         if (container) {
-          const index = Array.from(enginesTop.children).indexOf(a);
-          const target = container.children[index] || container.lastElementChild;
+          const idx = Array.from(enginesTop.children).indexOf(a);
+          const target = container.children[idx] || container.lastElementChild;
           target?.focus();
         }
       } else if (e.key === "ArrowUp") {
         e.preventDefault();
         const container = a.parentElement === enginesBottom ? enginesTop : null;
         if (container) {
-          const index = Array.from(enginesBottom.children).indexOf(a);
-          const target = container.children[index] || container.lastElementChild;
+          const idx = Array.from(enginesBottom.children).indexOf(a);
+          const target = container.children[idx] || container.lastElementChild;
           target?.focus();
         } else {
           searchInput.focus();
         }
+      } else if (e.key === "Tab") {
+        // Let Tab handle switching sections
       } else if (e.key === " ") {
         e.preventDefault();
         a.classList.toggle("selected");
@@ -134,9 +140,9 @@ function resizeSearch() {
 }
 searchInput.addEventListener("input", () => {
   resizeSearch();
-  const query = searchInput.value.trim();
   localStorage.setItem("search_query", searchInput.value);
   searchClear.classList.toggle("hidden", !searchInput.value);
+  const query = searchInput.value.trim();
   Object.entries(engines).forEach(([id, engine]) => {
     const a = document.getElementById(`engine-${id}`);
     if (query) {
@@ -157,20 +163,19 @@ searchClear.addEventListener("click", () => {
   searchInput.dispatchEvent(new Event("input"));
   searchInput.focus();
 });
-searchInput.addEventListener("keydown", (e) => {
+// Global Cmd+Enter and Navigation
+window.addEventListener("keydown", (e) => {
   if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+    e.preventDefault();
+    handleOpen();
+  }
+});
+searchInput.addEventListener("keydown", (e) => {
+  if (e.key === "ArrowDown" && searchInput.selectionStart === searchInput.value.length) {
     if (searchInput.value.trim()) {
       e.preventDefault();
       const firstEngine = enginesTop.querySelector(".engine-link:not(.disabled)");
       if (firstEngine) firstEngine.focus();
-    }
-  } else if (e.key === "ArrowDown") {
-    if (searchInput.selectionStart === searchInput.value.length) {
-      if (searchInput.value.trim()) {
-        e.preventDefault();
-        const firstEngine = enginesTop.querySelector(".engine-link:not(.disabled)");
-        if (firstEngine) firstEngine.focus();
-      }
     }
   }
 });
@@ -222,7 +227,7 @@ async function loadData() {
     }
   });
   bookmarks.forEach(renderBookmark);
-  skills.forEach(renderSkill);
+  skills.forEach((bm, i) => renderSkill(bm, i === 0));
 }
 function renderBookmark(bm) {
   const data = decode({ name: bm.title, url: bm.url || "" });
@@ -256,19 +261,43 @@ function renderBookmark(bm) {
   });
   gridContainer.appendChild(div);
 }
-function renderSkill(bm) {
+function renderSkill(bm, isFirst) {
   const data = decode({ name: bm.title, url: bm.url || "" });
   const btn = document.createElement("button");
   btn.className = "skill-btn";
   if (activeSkillIds.has(bm.id)) btn.classList.add("active");
   btn.textContent = data.title || "";
+  btn.tabIndex = isFirst ? 0 : -1;
   btn.addEventListener("click", () => {
     if (activeSkillIds.has(bm.id)) {
       activeSkillIds.delete(bm.id);
     } else {
       activeSkillIds.add(bm.id);
     }
-    loadData();
+    // Save current focus
+    const idx = Array.from(skillsList.children).indexOf(btn);
+    loadData().then(() => {
+      const nextBtn = skillsList.children[idx];
+      nextBtn?.focus();
+    });
+  });
+  btn.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+      e.preventDefault();
+      btn.nextElementSibling?.focus();
+    } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+      e.preventDefault();
+      btn.previousElementSibling?.focus();
+    } else if (e.key === "ArrowUp" && !btn.previousElementSibling) {
+      e.preventDefault();
+      const firstEngine = enginesTop.querySelector(".engine-link:not(.disabled)");
+      if (firstEngine) firstEngine.focus();
+    }
+  });
+  btn.addEventListener("focus", () => {
+    // Roving tabindex
+    Array.from(skillsList.children).forEach((c) => c.tabIndex = -1);
+    btn.tabIndex = 0;
   });
   skillsList.appendChild(btn);
 }
@@ -468,6 +497,6 @@ loadData();
 const savedQuery = localStorage.getItem("search_query");
 if (savedQuery) {
   searchInput.value = savedQuery;
-  searchClear.classList.remove("hidden");
+  searchClear.classList.toggle("hidden", !savedQuery);
 }
 resizeSearch();
