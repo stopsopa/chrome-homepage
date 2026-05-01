@@ -129,7 +129,7 @@ async function handleOpen() {
         }
       })
     );
-    skillsPrompt = skillsData.filter((s) => s?.content).map((s) => s.content).join("\n-----\n");
+    skillsPrompt = skillsData.map((s) => s?.content?.trim()).filter(Boolean).join("\n-----\n");
   }
   const processEngine = (id) => {
     const engine = engines[id];
