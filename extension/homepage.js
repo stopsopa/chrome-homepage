@@ -9,16 +9,25 @@ console.log("Homepage script initializing...");
 const searchInput = document.getElementById("search-input");
 const enginesTop = document.getElementById("engines-top");
 const enginesBottom = document.getElementById("engines-bottom");
+const skillsList = document.getElementById("skills-list");
 const editToggle = document.getElementById("edit-toggle");
 const gridContainer = document.getElementById("grid-container");
 const addBtn = document.getElementById("add-bookmark");
-const dialog = document.getElementById("bookmark-dialog");
-const form = document.getElementById("bookmark-form");
-const cancelBtn = document.getElementById("dialog-cancel");
-const dialogTitle = document.getElementById("dialog-title");
+const addSkillBtn = document.getElementById("add-skill");
+const bookmarkDialog = document.getElementById("bookmark-dialog");
+const bookmarkForm = document.getElementById("bookmark-form");
+const dialogCancel = document.getElementById("dialog-cancel");
+const skillsDialog = document.getElementById("skills-dialog");
+const skillsManagerList = document.getElementById("skills-manager-list");
+const skillForm = document.getElementById("skill-form");
+const newSkillBtn = document.getElementById("new-skill-btn");
+const deleteSkillBtn = document.getElementById("delete-skill-btn");
+const closeSkillsBtn = document.getElementById("close-skills-btn");
 let isEditMode = false;
 let currentFolderId = null;
 let currentEditId = null;
+let currentSkillId = null;
+let activeSkillId = null;
 let dragElement = null;
 let dragStartX = 0;
 let dragStartY = 0;
@@ -35,9 +44,7 @@ function initEngines() {
     a.href = "";
     a.title = engine.label;
     a.tabIndex = 0;
-    // Make focusable
     a.innerHTML = `<img src="${engine.icon}" alt="${engine.label}">`;
-    // Handle keyboard navigation on engines
     a.addEventListener("keydown", (e) => {
       if (e.key === "ArrowRight") {
         e.preventDefault();
@@ -78,11 +85,18 @@ function initEngines() {
     targetRow.appendChild(a);
   });
 }
-function handleOpen() {
-  const query = searchInput.value.trim();
-  if (!query) return;
+async function handleOpen() {
+  const rawQuery = searchInput.value.trim();
+  if (!rawQuery) return;
+  let query = rawQuery;
+  if (activeSkillId) {
+    const [bm] = await chrome.bookmarks.get(activeSkillId);
+    const skillData = decode({ name: bm.title, url: bm.url || "" });
+    query = `${skillData.content}
+
+${rawQuery}`;
+  }
   const selectedEngines = Array.from(document.querySelectorAll(".engine-link.selected"));
-  // If none selected, use the currently focused one if it's an engine
   const active = document.activeElement;
   let targetEngines = selectedEngines;
   if (targetEngines.length === 0 && active && active.classList.contains("engine-link")) {
@@ -90,13 +104,11 @@ function handleOpen() {
   }
   if (targetEngines.length === 0) return;
   if (targetEngines.length === 1) {
-    // Open in current tab
     const id = targetEngines[0].id.replace("engine-", "");
     const engine = engines[id];
     window.location.href = engine.search(query);
   } else {
-    // Open in multiple tabs
-    targetEngines.forEach((el, i) => {
+    targetEngines.forEach((el) => {
       const id = el.id.replace("engine-", "");
       const engine = engines[id];
       const url = engine.search(query);
@@ -104,7 +116,6 @@ function handleOpen() {
     });
   }
 }
-// Auto-resize textarea
 function resizeSearch() {
   searchInput.style.height = "auto";
   searchInput.style.height = searchInput.scrollHeight + "px";
@@ -125,32 +136,21 @@ searchInput.addEventListener("input", () => {
   });
 });
 searchInput.addEventListener("keydown", (e) => {
-  // Cmd+Enter (Mac) or Ctrl+Enter (Win/Linux) moves to buttons
   if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
-    const query = searchInput.value.trim();
-    if (query) {
+    if (searchInput.value.trim()) {
       e.preventDefault();
       const firstEngine = enginesTop.querySelector(".engine-link:not(.disabled)");
-      if (firstEngine) {
-        firstEngine.focus();
-      }
+      if (firstEngine) firstEngine.focus();
     }
   } else if (e.key === "ArrowDown") {
-    // Only move to buttons if cursor is at the end of the text
     if (searchInput.selectionStart === searchInput.value.length) {
-      const query = searchInput.value.trim();
-      if (query) {
+      if (searchInput.value.trim()) {
         e.preventDefault();
         const firstEngine = enginesTop.querySelector(".engine-link:not(.disabled)");
-        if (firstEngine) {
-          firstEngine.focus();
-        }
+        if (firstEngine) firstEngine.focus();
       }
     }
   }
-});
-searchInput.addEventListener("click", () => {
-  // Return to typing mode
 });
 // Bookmark Management
 async function getFolder() {
@@ -181,30 +181,37 @@ async function getFolder() {
   currentFolderId = folder.id;
   return folder.id;
 }
-async function loadBookmarks() {
+async function loadData() {
   const folderId = await getFolder();
-  const bookmarks = await chrome.bookmarks.getChildren(folderId);
+  const items = await chrome.bookmarks.getChildren(folderId);
   gridContainer.innerHTML = "";
+  skillsList.innerHTML = "";
+  const bookmarks = [];
+  const skills = [];
+  items.forEach((item) => {
+    try {
+      const data = decode({ name: item.title, url: item.url || "" });
+      if (data.type === "skill") {
+        skills.push(item);
+      } else {
+        bookmarks.push(item);
+      }
+    } catch (e) {
+    }
+  });
   bookmarks.forEach(renderBookmark);
+  skills.forEach(renderSkill);
 }
 function renderBookmark(bm) {
-  let data;
-  try {
-    data = decode({ name: bm.title, url: bm.url });
-  } catch (e) {
-    return;
-    // Skip invalid
-  }
+  const data = decode({ name: bm.title, url: bm.url || "" });
   const div = document.createElement("a");
   div.className = "bookmark";
-  div.href = bm.url;
+  div.href = bm.url || "";
   div.dataset.id = bm.id;
   div.style.left = `${data.x || 100}px`;
   div.style.top = `${data.y || 100}px`;
   div.innerHTML = `
-        <div class="bookmark-icon">
-            <img src="${data.logo || ""}" alt="">
-        </div>
+        <div class="bookmark-icon"><img src="${data.logo || ""}"></div>
         <div class="bookmark-title">${data.title || "No Title"}</div>
         <div class="bookmark-actions">
             <button class="action-btn btn-edit" data-id="${bm.id}">e</button>
@@ -212,11 +219,8 @@ function renderBookmark(bm) {
         </div>
     `;
   div.addEventListener("mousedown", startDrag);
-  // Prevent navigation in edit mode
   div.addEventListener("click", (e) => {
-    if (isEditMode) {
-      e.preventDefault();
-    }
+    if (isEditMode) e.preventDefault();
   });
   div.querySelector(".btn-edit").addEventListener("click", (e) => {
     e.preventDefault();
@@ -230,11 +234,26 @@ function renderBookmark(bm) {
   });
   gridContainer.appendChild(div);
 }
+function renderSkill(bm) {
+  const data = decode({ name: bm.title, url: bm.url || "" });
+  const btn = document.createElement("button");
+  btn.className = "skill-btn";
+  if (activeSkillId === bm.id) btn.classList.add("active");
+  btn.textContent = data.title || "";
+  btn.addEventListener("click", () => {
+    if (activeSkillId === bm.id) {
+      activeSkillId = null;
+    } else {
+      activeSkillId = bm.id;
+    }
+    loadData();
+  });
+  skillsList.appendChild(btn);
+}
 // Drag & Drop
 function startDrag(e) {
   if (!isEditMode) return;
   const target = e.target;
-  // Only allow dragging if clicking the icon or the icon container
   if (!target.closest(".bookmark-icon")) return;
   if (target.closest(".bookmark-actions")) return;
   e.preventDefault();
@@ -250,7 +269,6 @@ function onDrag(e) {
   if (!dragElement) return;
   const dx = e.clientX - dragStartX;
   const dy = e.clientY - dragStartY;
-  // Grid snapping (10px)
   const newX = Math.round((initialX + dx) / 10) * 10;
   const newY = Math.round((initialY + dy) / 10) * 10;
   dragElement.style.left = `${newX}px`;
@@ -261,20 +279,15 @@ async function stopDrag() {
   const id = dragElement.dataset.id;
   const x = parseInt(dragElement.style.left);
   const y = parseInt(dragElement.style.top);
-  // Save position
   const [bm] = await chrome.bookmarks.get(id);
-  const data = decode({ name: bm.title, url: bm.url });
+  const data = decode({ name: bm.title, url: bm.url || "" });
   data.x = x.toString();
   data.y = y.toString();
   const { name, url } = serialize(data);
   await chrome.bookmarks.update(id, { title: name, url });
   dragElement = null;
   document.removeEventListener("mousemove", onDrag);
-  document.removeEventListener("mouseup", stopStopDrag);
-}
-async function stopStopDrag() {
-  // dummy to satisfy previous code if needed, but I'll use the correct name
-  stopDrag();
+  document.removeEventListener("mouseup", stopDrag);
 }
 // Edit Mode
 editToggle.addEventListener("click", () => {
@@ -282,63 +295,126 @@ editToggle.addEventListener("click", () => {
   document.body.classList.toggle("edit-mode", isEditMode);
   editToggle.classList.toggle("active", isEditMode);
   addBtn.classList.toggle("hidden", !isEditMode);
+  addSkillBtn.classList.toggle("hidden", !isEditMode);
 });
-// Dialog
+// Bookmark Dialog
 addBtn.addEventListener("click", () => {
   currentEditId = null;
-  dialogTitle.textContent = "Add Bookmark";
-  form.reset();
-  dialog.showModal();
+  bookmarkForm.reset();
+  bookmarkDialog.showModal();
 });
-cancelBtn.addEventListener("click", () => dialog.close());
+dialogCancel.addEventListener("click", () => bookmarkDialog.close());
 async function openEdit(id) {
   currentEditId = id;
-  dialogTitle.textContent = "Edit Bookmark";
   const [bm] = await chrome.bookmarks.get(id);
-  const data = decode({ name: bm.title, url: bm.url });
-  form.elements.namedItem("title").value = data.title || "";
-  form.elements.namedItem("url").value = bm.url || "";
-  form.elements.namedItem("logo").value = data.logo || "";
-  dialog.showModal();
+  const data = decode({ name: bm.title, url: bm.url || "" });
+  bookmarkForm.elements.namedItem("title").value = data.title || "";
+  bookmarkForm.elements.namedItem("url").value = bm.url || "";
+  bookmarkForm.elements.namedItem("logo").value = data.logo || "";
+  bookmarkDialog.showModal();
 }
 async function removeBookmark(id) {
   if (confirm("Delete this bookmark?")) {
     await chrome.bookmarks.remove(id);
-    loadBookmarks();
+    loadData();
   }
 }
-form.addEventListener("submit", async (e) => {
+bookmarkForm.addEventListener("submit", async (e) => {
   e.preventDefault();
-  const fd = new FormData(form);
-  const title = fd.get("title");
-  const url = fd.get("url");
-  const logo = fd.get("logo");
+  const fd = new FormData(bookmarkForm);
   const folderId = await getFolder();
-  let bookmarkData = { type: "link", title, logo, url };
+  let data = {
+    type: "link",
+    title: fd.get("title") || "",
+    logo: fd.get("logo") || "",
+    url: fd.get("url") || ""
+  };
   if (currentEditId) {
     const [bm] = await chrome.bookmarks.get(currentEditId);
-    const oldData = decode({ name: bm.title, url: bm.url });
-    bookmarkData.x = oldData.x;
-    bookmarkData.y = oldData.y;
-    const { name, url: finalUrl } = serialize(bookmarkData);
-    await chrome.bookmarks.update(currentEditId, { title: name, url: finalUrl });
+    const old = decode({ name: bm.title, url: bm.url || "" });
+    data.x = old.x;
+    data.y = old.y;
+    const { name, url } = serialize(data);
+    await chrome.bookmarks.update(currentEditId, { title: name, url });
   } else {
-    bookmarkData.x = "100";
-    bookmarkData.y = "100";
-    const { name, url: finalUrl } = serialize(bookmarkData);
-    await chrome.bookmarks.create({ parentId: folderId, title: name, url: finalUrl });
+    data.x = "100";
+    data.y = "100";
+    const { name, url } = serialize(data);
+    await chrome.bookmarks.create({ parentId: folderId, title: name, url });
   }
-  dialog.close();
-  loadBookmarks();
+  bookmarkDialog.close();
+  loadData();
 });
-// Esc to close dialog (default behavior for dialog.showModal, but let's be sure)
-window.addEventListener("keydown", (e) => {
-  if (e.key === "Escape" && dialog.open) {
-    dialog.close();
+// Skills Management
+addSkillBtn.addEventListener("click", async () => {
+  await renderSkillsManager();
+  skillsDialog.showModal();
+});
+closeSkillsBtn.addEventListener("click", () => skillsDialog.close());
+async function renderSkillsManager() {
+  const folderId = await getFolder();
+  const items = await chrome.bookmarks.getChildren(folderId);
+  skillsManagerList.innerHTML = "";
+  items.forEach((item) => {
+    try {
+      const data = decode({ name: item.title, url: item.url || "" });
+      if (data.type === "skill") {
+        const div = document.createElement("div");
+        div.className = "skill-item";
+        if (currentSkillId === item.id) div.classList.add("active");
+        div.textContent = data.title || "";
+        div.onclick = () => {
+          currentSkillId = item.id;
+          editSkill(item);
+          renderSkillsManager();
+        };
+        skillsManagerList.appendChild(div);
+      }
+    } catch (e) {
+    }
+  });
+}
+function editSkill(bm) {
+  const data = decode({ name: bm.title, url: bm.url || "" });
+  skillForm.elements.namedItem("title").value = data.title || "";
+  skillForm.elements.namedItem("content").value = data.content || "";
+  deleteSkillBtn.classList.remove("hidden");
+}
+newSkillBtn.addEventListener("click", () => {
+  currentSkillId = null;
+  skillForm.reset();
+  deleteSkillBtn.classList.add("hidden");
+  renderSkillsManager();
+});
+skillForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const fd = new FormData(skillForm);
+  const folderId = await getFolder();
+  const data = {
+    type: "skill",
+    title: fd.get("title") || "",
+    content: fd.get("content") || ""
+  };
+  const { name, url } = serialize(data);
+  if (currentSkillId) {
+    await chrome.bookmarks.update(currentSkillId, { title: name, url });
+  } else {
+    await chrome.bookmarks.create({ parentId: folderId, title: name, url });
+  }
+  renderSkillsManager();
+  loadData();
+});
+deleteSkillBtn.addEventListener("click", async () => {
+  if (currentSkillId && confirm("Delete this skill?")) {
+    await chrome.bookmarks.remove(currentSkillId);
+    currentSkillId = null;
+    skillForm.reset();
+    deleteSkillBtn.classList.add("hidden");
+    renderSkillsManager();
+    loadData();
   }
 });
 // Start
 initEngines();
-loadBookmarks();
+loadData();
 resizeSearch();
-// Initial height

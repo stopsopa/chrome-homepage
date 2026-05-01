@@ -12,11 +12,15 @@
                 <textarea id="search-input" placeholder="Search..." autocomplete="off" rows="1"></textarea>
                 <div id="search-engines">
                     <div id="engines-top" class="engine-row"></div>
-                    <div id="engines-bottom" class="engine-row"></div>
+                    <div id="engines-bottom-wrapper">
+                        <div id="engines-bottom" class="engine-row"></div>
+                        <div id="skills-list"></div>
+                    </div>
                 </div>
             </div>
         </div>
         <div class="header-actions">
+            <button id="add-skill" class="hidden">Add Skill</button>
             <button id="add-bookmark" class="hidden">Add Link</button>
             <button id="edit-toggle">Edit</button>
         </div>
@@ -26,6 +30,7 @@
         <!-- Bookmarks will be rendered here -->
     </main>
 
+    <!-- Bookmark Dialog -->
     <dialog id="bookmark-dialog">
         <form id="bookmark-form" method="dialog">
             <header>
@@ -48,6 +53,34 @@
                 <button type="submit">Submit</button>
             </footer>
         </form>
+    </dialog>
+
+    <!-- Skills Management Dialog -->
+    <dialog id="skills-dialog" class="fullscreen-dialog">
+        <div class="skills-manager">
+            <aside class="skills-sidebar">
+                <h3>Skills</h3>
+                <div id="skills-manager-list"></div>
+                <button id="new-skill-btn">+ New Skill</button>
+                <button id="close-skills-btn">Close</button>
+            </aside>
+            <section class="skills-editor">
+                <form id="skill-form">
+                    <div class="field">
+                        <label>Skill Title</label>
+                        <input type="text" name="title" id="skill-title" required placeholder="e.g. Code Expert">
+                    </div>
+                    <div class="field">
+                        <label>Prompt Content</label>
+                        <textarea name="content" id="skill-content" required placeholder="Prepend this to your query..."></textarea>
+                    </div>
+                    <footer>
+                        <button type="button" id="delete-skill-btn" class="danger hidden">Delete</button>
+                        <button type="submit">Save Skill</button>
+                    </footer>
+                </form>
+            </section>
+        </div>
     </dialog>
 
     <script type="module" src="homepage.js"></script>

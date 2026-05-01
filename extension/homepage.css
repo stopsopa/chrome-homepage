@@ -5,6 +5,7 @@
     --accent-color: #0ea5e9;
     --grid-size: 100px;
     --border-color: #e2e8f0;
+    --danger-color: #ef4444;
 }
 
 body {
@@ -34,17 +35,17 @@ header {
 .search-container {
     flex: 1;
     max-width: 1000px;
-    height: 60px; /* This is centered in the 102px header */
+    height: 60px;
     position: relative;
 }
 
 .search-wrapper {
     display: flex;
     flex-direction: row;
-    align-items: flex-start; /* Grow only downwards */
+    align-items: flex-start;
     gap: 0.8rem;
     position: absolute;
-    top: 0; /* Start at the top of the centered container */
+    top: 0;
     left: 0;
     width: 100%;
     z-index: 200;
@@ -79,22 +80,48 @@ header {
     display: flex;
     flex-direction: column;
     gap: 4px;
-    padding-top: 0px; /* Initial state, we might need a small offset to center with 1-line input */
-    margin-top: -2px; /* Slight adjustment to center against 44px input initially */
 }
 
-/* 
-   When input is 44px and container is 60px:
-   Input starts at 0, goes to 44.
-   Engines start at 0, go to 60.
-   To make 44px input look centered in 60px engines:
-   Input needs 8px top margin.
-   OR Engines stay at 0 and we accept they are taller.
-*/
+#engines-bottom-wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+}
 
 .engine-row {
     display: flex;
     gap: 4px;
+}
+
+#skills-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    max-width: 300px;
+}
+
+.skill-btn {
+    font-size: 10px;
+    padding: 1px 4px;
+    margin: 2px;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    background: #f8fafc;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+    color: #64748b;
+}
+
+.skill-btn:hover {
+    background: #f1f5f9;
+}
+
+.skill-btn.active {
+    background: #10b981;
+    color: white;
+    border-color: #10b981;
 }
 
 .engine-link {
@@ -169,7 +196,7 @@ header {
     gap: 0.5rem;
 }
 
-#edit-toggle, #add-bookmark {
+#edit-toggle, #add-bookmark, #add-skill {
     background: var(--input-bg);
     border: none;
     color: var(--text-color);
@@ -187,6 +214,11 @@ header {
 
 #add-bookmark {
     background: #10b981;
+    color: white;
+}
+
+#add-skill {
+    background: #8b5cf6;
     color: white;
 }
 
@@ -235,19 +267,11 @@ body.edit-mode #grid-container {
     object-fit: cover;
 }
 
-.bookmark:hover .bookmark-icon {
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-}
-
 .bookmark-title {
     font-size: 0.9rem;
     font-weight: 500;
     white-space: nowrap;
     color: #475569;
-}
-
-.bookmark:hover .bookmark-title {
-    color: var(--text-color);
 }
 
 .bookmark-actions {
@@ -263,10 +287,6 @@ body.edit-mode .bookmark-actions {
     display: flex;
 }
 
-body.edit-mode .bookmark-icon {
-    cursor: move;
-}
-
 .action-btn {
     width: 20px;
     height: 20px;
@@ -279,7 +299,6 @@ body.edit-mode .bookmark-icon {
     font-weight: bold;
     cursor: pointer;
     color: white;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .btn-del { background: #ef4444; }
@@ -287,6 +306,7 @@ body.edit-mode .bookmark-icon {
 
 .hidden { display: none !important; }
 
+/* Dialogs */
 dialog {
     background: white;
     border: 1px solid var(--border-color);
@@ -301,12 +321,98 @@ dialog::backdrop {
     backdrop-filter: blur(4px);
 }
 
-form {
+.fullscreen-dialog {
+    width: 90vw;
+    height: 90vh;
+    max-width: 1200px;
+    max-height: 800px;
+    padding: 0;
+    overflow: hidden;
+}
+
+.skills-manager {
+    display: flex;
+    height: 100%;
+}
+
+.skills-sidebar {
+    width: 250px;
+    border-right: 1px solid var(--border-color);
+    background: #f8fafc;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.skills-sidebar h3 {
+    margin-top: 0;
+    font-size: 1.2rem;
+}
+
+#skills-manager-list {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.skill-item {
+    padding: 0.8rem;
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.skill-item:hover {
+    border-color: var(--accent-color);
+}
+
+.skill-item.active {
+    background: var(--accent-color);
+    color: white;
+    border-color: var(--accent-color);
+}
+
+.skills-sidebar button {
+    padding: 0.8rem;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+#new-skill-btn { background: #10b981; color: white; }
+#close-skills-btn { background: #e2e8f0; color: #475569; }
+
+.skills-editor {
+    flex: 1;
+    padding: 2rem;
+    background: white;
+}
+
+.skills-editor form {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
-    min-width: 300px;
+    height: 100%;
 }
+
+.skills-editor textarea {
+    flex: 1;
+    background: #f8fafc;
+    border: 1px solid var(--border-color);
+    padding: 1rem;
+    border-radius: 8px;
+    resize: none;
+    font-family: inherit;
+}
+
+.danger { background: var(--danger-color) !important; color: white !important; }
 
 .field {
     display: flex;
@@ -328,31 +434,3 @@ form {
     color: var(--text-color);
     outline: none;
 }
-
-.field input:focus {
-    border-color: var(--accent-color);
-    background: white;
-}
-
-footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: 1rem;
-    margin-top: 0.5rem;
-}
-
-footer button {
-    padding: 0.8rem 1.5rem;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    font-weight: 600;
-    transition: opacity 0.2s;
-}
-
-footer button:hover {
-    opacity: 0.9;
-}
-
-button[type="submit"] { background: var(--accent-color); color: white; }
-#dialog-cancel { background: #e2e8f0; color: #475569; }

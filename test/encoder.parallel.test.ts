@@ -51,6 +51,7 @@ it("should serialize and decode a bookmark without a URL (fallback to chrome://n
 it("should handle bookmark with chrome://new-tab-page explicitly", () => {
   const bookmark: Bookmark = {
     type: "special",
+    title: "",
     url: "chrome://new-tab-page",
     description: "Home"
   };
@@ -63,6 +64,7 @@ it("should handle bookmark with chrome://new-tab-page explicitly", () => {
   // Requirement says: when url is 'chrome://new-tab-page' then we should generate variant without url
   const expected: Bookmark = {
     type: "special",
+    title: "",
     description: "Home"
   };
   assert.deepStrictEqual(decoded, expected);
