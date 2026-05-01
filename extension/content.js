@@ -80,6 +80,55 @@ var search_default = {
       }
     }
   },
+  claude: {
+    position: "bottom",
+    label: "Claude",
+    icon: "./icons/claude.png",
+    search: function(query) {
+      return `https://claude.ai/new?q=${encodeURIComponent(query)}`;
+    },
+    detect: function(url2) {
+      const prefix = "https://claude.ai";
+      const detect = url2.startsWith(prefix);
+      log(`url plugin '${url2}'.startsWith("${prefix}")`, detect);
+      return detect;
+    },
+    act: async function(url2) {
+      await new Promise((resolve) => setTimeout(resolve, 2e3));
+      const prompt = new URL(url2).searchParams.get("q");
+      if (!prompt) {
+        log("claude.act(): no prompt");
+        return;
+      }
+      const contenteditable = document.querySelector('[contenteditable="true"]');
+      if (contenteditable) {
+        log(`claude.act(): injecting prompt "${prompt}"`);
+        let attempts = 0;
+        (function attempt() {
+          attempts += 1;
+          if (attempts > 5) {
+            log("claude.act(): too many attempts");
+            return;
+          }
+          if (contenteditable.textContent === "") {
+            log("claude.act(): empty contenteditable - stop processing");
+            return;
+          }
+          log(`claude.act(): attempt >${attempts}<`);
+          try {
+            const button = document.querySelector(`button[aria-label="Send message"]`);
+            log(`claude.act(): clicking button`, button);
+            button.click();
+          } catch (e) {
+            log("claude.act(): button not found");
+          }
+          setTimeout(attempt, 1e3);
+        })();
+      } else {
+        log("claude.act(): no contenteditable");
+      }
+    }
+  },
   google: {
     position: "top",
     label: "Google",
