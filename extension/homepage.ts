@@ -148,7 +148,11 @@ function renderBookmark(bm: any) {
 // Drag & Drop
 function startDrag(e: MouseEvent) {
     if (!isEditMode) return;
-    if ((e.target as HTMLElement).closest('.bookmark-actions')) return;
+    
+    const target = e.target as HTMLElement;
+    // Only allow dragging if clicking the icon or the icon container
+    if (!target.closest('.bookmark-icon')) return;
+    if (target.closest('.bookmark-actions')) return;
     
     e.preventDefault();
     dragElement = (e.currentTarget as HTMLElement);
