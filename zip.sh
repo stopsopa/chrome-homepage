@@ -57,13 +57,14 @@ if [ -f "${ZIP_NAME}" ]; then
 fi
 
 echo "Creating zip file: ${ZIP_NAME}"
-echo "Excluding: zip.sh, extension*.zip, and .DS_Store files"
+echo "Excluding: zip.sh, extension*.zip, .DS_Store, and *.ts files"
 
 # Zip everything in the current directory, excluding zip.sh, extension*.zip, .DS_Store files, and _metadata directory
 find . -type f \
   ! -name "extension*.zip" \
   ! -name ".DS_Store" \
   ! -path "*/_metadata/*" \
+  ! -name "*.ts" \
   | zip -@ "${ZIP_NAME}"
 
 echo "Done! Created ${ZIP_NAME}"
