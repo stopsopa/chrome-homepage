@@ -13,12 +13,26 @@ if (typeof window !== "undefined") {
         interrupted = true;
       }
     },
-    { once: true, capture: true }
+    { once: true, capture: true },
   );
 }
 
 function shouldStop() {
   return interrupted;
+}
+
+function type_v2(element: HTMLElement, value: string) {
+  if (!element) return false;
+
+  (element as any).value = value;
+
+  element.dispatchEvent(
+    new Event("input", {
+      bubbles: true,
+    }),
+  );
+
+  return true;
 }
 
 export default {
@@ -247,7 +261,7 @@ export default {
       if (contenteditable) {
         log(`T3.act(): injecting prompt "${prompt}"`);
 
-        contenteditable.value = prompt;
+        type_v2(contenteditable, prompt);
 
         let attempts = 0;
 

@@ -1,6 +1,32 @@
 function log(msg, ...args) {
   console.log(`chrome-homepage extension ${msg}`, ...args);
 }
+let interrupted = false;
+if (typeof window !== "undefined") {
+  window.addEventListener(
+    "mousedown",
+    () => {
+      if (!interrupted) {
+        log("user interaction detected - stopping automation");
+        interrupted = true;
+      }
+    },
+    { once: true, capture: true }
+  );
+}
+function shouldStop() {
+  return interrupted;
+}
+function type_v2(element, value) {
+  if (!element) return false;
+  element.value = value;
+  element.dispatchEvent(
+    new Event("input", {
+      bubbles: true
+    })
+  );
+  return true;
+}
 var search_default = {
   chatgpt: {
     position: "bottom",
@@ -18,6 +44,7 @@ var search_default = {
     act: async function(url) {
       log(`chatgpt.act(): >${url}< before wait`);
       await new Promise((resolve) => setTimeout(resolve, 2e3));
+      if (shouldStop()) return;
       log(`chatgpt.act(): >${url}< after wait`);
       try {
         const button = document.querySelector('[id="composer-submit-button"]');
@@ -44,6 +71,7 @@ var search_default = {
     },
     act: async function(url) {
       await new Promise((resolve) => setTimeout(resolve, 2e3));
+      if (shouldStop()) return;
       // extract prompt from url  use new URL()
       const prompt = new URL(url).searchParams.get("prompt");
       if (!prompt) {
@@ -56,6 +84,7 @@ var search_default = {
         contenteditable.textContent = prompt;
         let attempts = 0;
         (function attempt() {
+          if (shouldStop()) return;
           attempts += 1;
           if (attempts > 5) {
             log("gemini.act(): too many attempts");
@@ -95,6 +124,7 @@ var search_default = {
     },
     act: async function(url) {
       await new Promise((resolve) => setTimeout(resolve, 2e3));
+      if (shouldStop()) return;
       // extract prompt from url  use new URL()
       const prompt = new URL(url).searchParams.get("q");
       if (!prompt) {
@@ -108,6 +138,7 @@ var search_default = {
         // (contenteditable as HTMLElement).textContent = prompt;
         let attempts = 0;
         (function attempt() {
+          if (shouldStop()) return;
           attempts += 1;
           if (attempts > 5) {
             log("claude.act(): too many attempts");
@@ -155,6 +186,7 @@ var search_default = {
     },
     act: async function(url) {
       await new Promise((resolve) => setTimeout(resolve, 2e3));
+      if (shouldStop()) return;
       // extract prompt from url  use new URL()
       const prompt = new URL(url).searchParams.get("q");
       if (!prompt) {
@@ -164,9 +196,10 @@ var search_default = {
       const contenteditable = document.querySelector('[id="chat-input"]');
       if (contenteditable) {
         log(`T3.act(): injecting prompt "${prompt}"`);
-        contenteditable.value = prompt;
+        type_v2(contenteditable, prompt);
         let attempts = 0;
         (function attempt() {
+          if (shouldStop()) return;
           attempts += 1;
           if (attempts > 5) {
             log("T3.act(): too many attempts");
