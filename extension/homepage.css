@@ -6,6 +6,8 @@
     --grid-size: 100px;
     --border-color: #e2e8f0;
     --danger-color: #ef4444;
+    --success-color: #10b981;
+    --purple-color: #8b5cf6;
 }
 
 body {
@@ -19,6 +21,9 @@ body {
     flex-direction: column;
 }
 
+.hidden { display: none !important; }
+
+/* Header */
 header {
     padding: 0.5rem 1rem;
     display: flex;
@@ -67,13 +72,6 @@ header {
     font-family: inherit;
     line-height: 1.4;
     overflow-y: hidden;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-}
-
-#search-input:focus {
-    border-color: var(--accent-color);
-    background: white;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
 #search-engines {
@@ -98,7 +96,7 @@ header {
     display: flex;
     flex-wrap: wrap;
     gap: 2px;
-    max-width: 300px;
+    max-width: 400px;
 }
 
 .skill-btn {
@@ -114,14 +112,10 @@ header {
     color: #64748b;
 }
 
-.skill-btn:hover {
-    background: #f1f5f9;
-}
-
 .skill-btn.active {
-    background: #10b981;
+    background: var(--success-color);
     color: white;
-    border-color: #10b981;
+    border-color: var(--success-color);
 }
 
 .engine-link {
@@ -134,8 +128,6 @@ header {
     background: var(--input-bg);
     transition: all 0.2s;
     text-decoration: none;
-    border: 1px solid transparent;
-    position: relative;
 }
 
 .engine-link img {
@@ -144,50 +136,17 @@ header {
     object-fit: contain;
 }
 
-.engine-link.disabled {
-    opacity: 0.2;
-    cursor: default;
-    pointer-events: none;
-}
-
-.engine-link:not(.disabled):hover,
-.engine-link:not(.disabled):focus {
-    background: #e2e8f0;
-    transform: translateY(-1px);
-    outline: none;
-}
-
 .engine-link:focus {
-    border-color: var(--accent-color);
+    outline: none;
+    box-shadow: 0 0 0 2px var(--accent-color);
 }
 
 .engine-link.selected {
-    background: var(--input-bg);
-    border-color: var(--accent-color);
-    box-shadow: 0 0 0 2px var(--accent-color), 0 2px 8px rgba(14, 165, 233, 0.3);
+    box-shadow: 0 0 0 2px var(--bg-color), 0 0 0 4px var(--accent-color);
 }
 
-.engine-link.selected img {
-    filter: none;
-}
-
-.engine-link.selected::after {
-    content: '✓';
-    position: absolute;
-    top: -4px;
-    right: -4px;
-    background: #10b981;
-    color: white;
-    font-size: 8px;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    border: 1px solid white;
-    z-index: 2;
+.engine-link.selected:focus {
+    box-shadow: 0 0 0 2px var(--bg-color), 0 0 0 6px var(--accent-color);
 }
 
 .header-actions {
@@ -196,15 +155,25 @@ header {
     gap: 0.5rem;
 }
 
-#edit-toggle, #add-bookmark, #add-skill {
-    background: var(--input-bg);
-    border: none;
-    color: var(--text-color);
-    padding: 0.4rem 0.8rem;
+/* Button Variants */
+.btn-primary { background: var(--accent-color); color: white; }
+.btn-secondary { background: #e2e8f0; color: #475569; }
+.btn-danger { background: var(--danger-color); color: white; }
+.btn-success { background: var(--success-color); color: white; }
+.btn-purple { background: var(--purple-color); color: white; }
+
+.header-actions button, .dialog-footer button, .sidebar-header button, .sidebar-footer button {
+    padding: 0.5rem 1rem;
     border-radius: 8px;
+    border: none;
     cursor: pointer;
     font-weight: 600;
     font-size: 0.9rem;
+    transition: opacity 0.2s;
+}
+
+.header-actions button:hover, .dialog-footer button:hover {
+    opacity: 0.9;
 }
 
 #edit-toggle.active {
@@ -212,22 +181,12 @@ header {
     color: white;
 }
 
-#add-bookmark {
-    background: #10b981;
-    color: white;
-}
-
-#add-skill {
-    background: #8b5cf6;
-    color: white;
-}
-
+/* Grid */
 #grid-container {
     flex: 1;
     position: relative;
     overflow: auto;
-    background-image: 
-        radial-gradient(circle, #00000008 1px, transparent 1px);
+    background-image: radial-gradient(circle, #00000008 1px, transparent 1px);
     background-size: var(--grid-size) var(--grid-size);
 }
 
@@ -243,11 +202,8 @@ body.edit-mode #grid-container {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 0;
-    cursor: pointer;
     text-decoration: none;
     color: inherit;
-    user-select: none;
 }
 
 .bookmark-icon {
@@ -255,24 +211,11 @@ body.edit-mode #grid-container {
     height: 44px;
     border-radius: 8px;
     overflow: hidden;
-    flex-shrink: 0;
     background: #f8fafc;
     border: 1px solid var(--border-color);
-    transition: transform 0.1s, box-shadow 0.2s;
 }
 
-.bookmark-icon img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.bookmark-title {
-    font-size: 0.9rem;
-    font-weight: 500;
-    white-space: nowrap;
-    color: #475569;
-}
+.bookmark-icon img { width: 100%; height: 100%; object-fit: cover; }
 
 .bookmark-actions {
     display: none;
@@ -280,12 +223,9 @@ body.edit-mode #grid-container {
     top: -10px;
     left: -10px;
     gap: 4px;
-    z-index: 10;
 }
 
-body.edit-mode .bookmark-actions {
-    display: flex;
-}
+body.edit-mode .bookmark-actions { display: flex; }
 
 .action-btn {
     width: 20px;
@@ -296,31 +236,19 @@ body.edit-mode .bookmark-actions {
     align-items: center;
     justify-content: center;
     font-size: 10px;
-    font-weight: bold;
-    cursor: pointer;
     color: white;
+    cursor: pointer;
 }
 
-.btn-del { background: #ef4444; }
-.btn-edit { background: #3b82f6; }
+.btn-del { background: var(--danger-color); }
+.btn-edit { background: var(--accent-color); }
 
-.skills-editor footer button[type="submit"] {
-    background: var(--accent-color);
-    color: white;
-    padding: 0.8rem 1.5rem;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    font-weight: 600;
-}
-
-/* Dialogs */
+/* Dialogs General */
 dialog {
     background: white;
-    border: 1px solid var(--border-color);
+    border: none;
     border-radius: 16px;
     color: var(--text-color);
-    padding: 2rem;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
 }
 
@@ -329,118 +257,115 @@ dialog::backdrop {
     backdrop-filter: blur(4px);
 }
 
-.fullscreen-dialog {
-    width: 90vw;
+/* Bookmark Dialog */
+#bookmark-dialog {
+    width: 95vw;
     height: 90vh;
     max-width: 1200px;
-    max-height: 800px;
-    padding: 0;
-    overflow: hidden;
+    padding: 2.5rem;
+    box-sizing: border-box;
 }
 
-.skills-manager {
+#bookmark-form {
     display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
     height: 100%;
 }
 
-.skills-sidebar {
-    width: 250px;
-    border-right: 1px solid var(--border-color);
+#bookmark-form h2 { margin: 0 0 1rem 0; font-size: 1.8rem; }
+
+.field { display: flex; flex-direction: column; gap: 0.6rem; }
+.field label { font-size: 0.9rem; font-weight: 600; color: #64748b; }
+.field input, .field textarea {
     background: #f8fafc;
-    padding: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
+    border: 1px solid var(--border-color);
+    padding: 1rem;
+    border-radius: 10px;
+    outline: none;
+    font-family: inherit;
+    font-size: 1rem;
 }
 
-.skills-sidebar h3 {
-    margin-top: 0;
-    font-size: 1.2rem;
+.dialog-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1.5rem;
+    margin-top: auto;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
 }
+
+/* Skills Manager Dialog */
+.fullscreen-dialog {
+    width: 95vw;
+    height: 90vh;
+    max-width: 1200px;
+    padding: 0;
+}
+
+.skills-manager { display: flex; height: 100%; }
+
+.skills-sidebar {
+    width: 320px;
+    background: #f8fafc;
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sidebar-header h3 { margin: 0; }
 
 #skills-manager-list {
     flex: 1;
     overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    padding: 1rem;
+    display: flex; flex-direction: column; gap: 0.5rem;
 }
 
-.skill-item {
-    padding: 0.8rem;
+.skill-manager-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     background: white;
     border: 1px solid var(--border-color);
     border-radius: 8px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: all 0.2s;
+    padding: 0.5rem;
+    transition: border-color 0.2s;
 }
 
-.skill-item:hover {
-    border-color: var(--accent-color);
+.skill-manager-row:hover { border-color: var(--accent-color); }
+.skill-manager-row.active { border-color: var(--accent-color); background: #f0f9ff; }
+
+.skill-info { flex: 1; cursor: pointer; font-weight: 500; font-size: 0.95rem; }
+
+.skill-row-actions { display: flex; gap: 4px; }
+
+.sidebar-footer {
+    padding: 1rem;
+    border-top: 1px solid var(--border-color);
 }
 
-.skill-item.active {
-    background: var(--accent-color);
-    color: white;
-    border-color: var(--accent-color);
-}
+.sidebar-footer button { width: 100%; }
 
-.skills-sidebar button {
-    padding: 0.8rem;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    font-weight: 600;
-}
+.skills-editor { flex: 1; padding: 2.5rem; overflow-y: auto; display: flex; flex-direction: column; }
 
-#new-skill-btn { background: #10b981; color: white; }
-#close-skills-btn { background: #e2e8f0; color: #475569; }
+.skills-editor form { flex: 1; display: flex; flex-direction: column; }
 
-.skills-editor {
-    flex: 1;
-    padding: 2rem;
-    background: white;
-    overflow-y: auto;
-}
-
-.skills-editor form {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-}
+.skill-content-field { flex: 1; display: flex; flex-direction: column; }
 
 .skills-editor textarea {
-    background: #f8fafc;
-    border: 1px solid var(--border-color);
-    padding: 1rem;
-    border-radius: 8px;
-    resize: none;
-    font-family: inherit;
+    flex: 1;
     min-height: 200px;
+    resize: none;
     overflow: hidden;
     line-height: 1.5;
-}
-
-.danger { background: var(--danger-color) !important; color: white !important; }
-
-.field {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-}
-
-.field label {
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: #64748b;
-}
-
-.field input {
-    background: #f8fafc;
-    border: 1px solid var(--border-color);
-    padding: 0.8rem;
-    border-radius: 8px;
-    color: var(--text-color);
-    outline: none;
 }

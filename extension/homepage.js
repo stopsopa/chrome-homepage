@@ -21,14 +21,13 @@ const skillsDialog = document.getElementById("skills-dialog");
 const skillsManagerList = document.getElementById("skills-manager-list");
 const skillForm = document.getElementById("skill-form");
 const newSkillBtn = document.getElementById("new-skill-btn");
-const deleteSkillBtn = document.getElementById("delete-skill-btn");
 const skillContent = document.getElementById("skill-content");
 const closeSkillsBtn = document.getElementById("close-skills-btn");
 let isEditMode = false;
 let currentFolderId = null;
 let currentEditId = null;
 let currentSkillId = null;
-let activeSkillId = null;
+let activeSkillIds = /* @__PURE__ */ new Set();
 let dragElement = null;
 let dragStartX = 0;
 let dragStartY = 0;
@@ -89,14 +88,6 @@ function initEngines() {
 async function handleOpen() {
   const rawQuery = searchInput.value.trim();
   if (!rawQuery) return;
-  let query = rawQuery;
-  if (activeSkillId) {
-    const [bm] = await chrome.bookmarks.get(activeSkillId);
-    const skillData = decode({ name: bm.title, url: bm.url || "" });
-    query = `${skillData.content}
-
-${rawQuery}`;
-  }
   const selectedEngines = Array.from(document.querySelectorAll(".engine-link.selected"));
   const active = document.activeElement;
   let targetEngines = selectedEngines;
@@ -104,15 +95,34 @@ ${rawQuery}`;
     targetEngines = [active];
   }
   if (targetEngines.length === 0) return;
+  // Get combined skills prompt
+  let skillsPrompt = "";
+  if (activeSkillIds.size > 0) {
+    const skillsData = await Promise.all(
+      Array.from(activeSkillIds).map(async (id) => {
+        const [bm] = await chrome.bookmarks.get(id);
+        return decode({ name: bm.title, url: bm.url || "" });
+      })
+    );
+    skillsPrompt = skillsData.map((s) => s.content).filter(Boolean).join("\n\n");
+  }
+  const processEngine = (id) => {
+    const engine = engines[id];
+    let query = rawQuery;
+    if (engine.position === "bottom" && skillsPrompt) {
+      query = `${skillsPrompt}
+
+${rawQuery}`;
+    }
+    return engine.search(query);
+  };
   if (targetEngines.length === 1) {
     const id = targetEngines[0].id.replace("engine-", "");
-    const engine = engines[id];
-    window.location.href = engine.search(query);
+    window.location.href = processEngine(id);
   } else {
     targetEngines.forEach((el) => {
       const id = el.id.replace("engine-", "");
-      const engine = engines[id];
-      const url = engine.search(query);
+      const url = processEngine(id);
       chrome.tabs.create({ url, active: false });
     });
   }
@@ -239,13 +249,13 @@ function renderSkill(bm) {
   const data = decode({ name: bm.title, url: bm.url || "" });
   const btn = document.createElement("button");
   btn.className = "skill-btn";
-  if (activeSkillId === bm.id) btn.classList.add("active");
+  if (activeSkillIds.has(bm.id)) btn.classList.add("active");
   btn.textContent = data.title || "";
   btn.addEventListener("click", () => {
-    if (activeSkillId === bm.id) {
-      activeSkillId = null;
+    if (activeSkillIds.has(bm.id)) {
+      activeSkillIds.delete(bm.id);
     } else {
-      activeSkillId = bm.id;
+      activeSkillIds.add(bm.id);
     }
     loadData();
   });
@@ -360,16 +370,44 @@ async function renderSkillsManager() {
     try {
       const data = decode({ name: item.title, url: item.url || "" });
       if (data.type === "skill") {
-        const div = document.createElement("div");
-        div.className = "skill-item";
-        if (currentSkillId === item.id) div.classList.add("active");
-        div.textContent = data.title || "";
-        div.onclick = () => {
+        const row = document.createElement("div");
+        row.className = "skill-manager-row";
+        if (currentSkillId === item.id) row.classList.add("active");
+        row.innerHTML = `
+                    <div class="skill-info">${data.title || ""}</div>
+                    <div class="skill-row-actions">
+                        <button class="action-btn btn-edit" title="Edit">e</button>
+                        <button class="action-btn btn-del" title="Delete">x</button>
+                    </div>
+                `;
+        const info = row.querySelector(".skill-info");
+        info.onclick = () => {
           currentSkillId = item.id;
           editSkill(item);
           renderSkillsManager();
         };
-        skillsManagerList.appendChild(div);
+        row.querySelector(".btn-edit").addEventListener("click", (e) => {
+          e.stopPropagation();
+          currentSkillId = item.id;
+          editSkill(item);
+          renderSkillsManager();
+        });
+        row.querySelector(".btn-del").addEventListener("click", (e) => {
+          e.stopPropagation();
+          if (confirm("Delete this skill?")) {
+            chrome.bookmarks.remove(item.id, () => {
+              if (currentSkillId === item.id) {
+                currentSkillId = null;
+                skillForm.reset();
+                skillContent.style.height = "auto";
+              }
+              activeSkillIds.delete(item.id);
+              renderSkillsManager();
+              loadData();
+            });
+          }
+        });
+        skillsManagerList.appendChild(row);
       }
     } catch (e) {
     }
@@ -382,14 +420,12 @@ function editSkill(bm) {
   // Auto-expand
   skillContent.style.height = "auto";
   skillContent.style.height = skillContent.scrollHeight + "px";
-  deleteSkillBtn.classList.remove("hidden");
 }
 newSkillBtn.addEventListener("click", () => {
   currentSkillId = null;
   skillForm.reset();
   skillContent.style.height = "auto";
   // Reset height
-  deleteSkillBtn.classList.add("hidden");
   renderSkillsManager();
 });
 skillContent.addEventListener("input", () => {
@@ -413,16 +449,6 @@ skillForm.addEventListener("submit", async (e) => {
   }
   renderSkillsManager();
   loadData();
-});
-deleteSkillBtn.addEventListener("click", async () => {
-  if (currentSkillId && confirm("Delete this skill?")) {
-    await chrome.bookmarks.remove(currentSkillId);
-    currentSkillId = null;
-    skillForm.reset();
-    deleteSkillBtn.classList.add("hidden");
-    renderSkillsManager();
-    loadData();
-  }
 });
 // Start
 initEngines();
