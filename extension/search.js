@@ -43,7 +43,7 @@ var search_default = {
     },
     act: async function(url) {
       log(`chatgpt.act(): >${url}< before wait`);
-      await new Promise((resolve) => setTimeout(resolve, 2e3));
+      await new Promise((resolve) => setTimeout(resolve, 1e3));
       if (shouldStop()) return;
       log(`chatgpt.act(): >${url}< after wait`);
       try {

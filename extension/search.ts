@@ -55,8 +55,10 @@ export default {
     act: async function (url: string) {
       log(`chatgpt.act(): >${url}< before wait`);
 
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       if (shouldStop()) return;
+      
       log(`chatgpt.act(): >${url}< after wait`);
 
       try {

@@ -27,24 +27,24 @@ header {
     border-bottom: 1px solid var(--border-color);
     background: white;
     z-index: 100;
-    height: 102px; /* Fixed height for header */
+    height: 102px;
     box-sizing: border-box;
 }
 
 .search-container {
     flex: 1;
     max-width: 1000px;
-    height: 44px; /* Fixed height for container */
+    height: 60px; /* This is centered in the 102px header */
     position: relative;
 }
 
 .search-wrapper {
     display: flex;
     flex-direction: row;
-    align-items: flex-start;
+    align-items: flex-start; /* Grow only downwards */
     gap: 0.8rem;
     position: absolute;
-    top: 0;
+    top: 0; /* Start at the top of the centered container */
     left: 0;
     width: 100%;
     z-index: 200;
@@ -79,8 +79,18 @@ header {
     display: flex;
     flex-direction: column;
     gap: 4px;
-    padding-top: 4px;
+    padding-top: 0px; /* Initial state, we might need a small offset to center with 1-line input */
+    margin-top: -2px; /* Slight adjustment to center against 44px input initially */
 }
+
+/* 
+   When input is 44px and container is 60px:
+   Input starts at 0, goes to 44.
+   Engines start at 0, go to 60.
+   To make 44px input look centered in 60px engines:
+   Input needs 8px top margin.
+   OR Engines stay at 0 and we accept they are taller.
+*/
 
 .engine-row {
     display: flex;
