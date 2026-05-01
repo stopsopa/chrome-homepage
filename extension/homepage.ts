@@ -160,7 +160,7 @@ async function handleOpen() {
         const engine = (engines as any)[id];
         let query = rawQuery;
         if (engine.position === 'bottom' && skillsPrompt) {
-            query = `${skillsPrompt}\n\n${rawQuery}`;
+            query = `${skillsPrompt}\n-----\n${rawQuery}`;
         }
         return engine.search(query);
     };

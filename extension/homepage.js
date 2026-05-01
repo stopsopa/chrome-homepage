@@ -136,7 +136,7 @@ async function handleOpen() {
     let query = rawQuery;
     if (engine.position === "bottom" && skillsPrompt) {
       query = `${skillsPrompt}
-
+-----
 ${rawQuery}`;
     }
     return engine.search(query);
