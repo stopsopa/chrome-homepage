@@ -48,6 +48,10 @@ function initEngines() {
     // Only first engine is focusable by tab
     a.tabIndex = index === 0 ? 0 : -1;
     a.innerHTML = `<img src="${engine.icon}" alt="${engine.label}">`;
+    a.addEventListener("click", (e) => {
+      e.preventDefault();
+      a.classList.toggle("selected");
+    });
     a.addEventListener("keydown", (e) => {
       if (e.key === "ArrowRight") {
         e.preventDefault();
@@ -235,6 +239,7 @@ function renderBookmark(bm) {
   div.className = "bookmark";
   div.href = bm.url || "";
   div.dataset.id = bm.id;
+  div.tabIndex = -1;
   div.style.left = `${data.x || 100}px`;
   div.style.top = `${data.y || 100}px`;
   div.innerHTML = `

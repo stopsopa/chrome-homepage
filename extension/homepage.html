@@ -8,6 +8,7 @@
 <body>
     <header>
         <div class="search-container">
+            <div class="search-hint">press ⌘ + enter to open selected</div>
             <div class="search-wrapper">
                 <div class="textarea-wrapper">
                     <textarea id="search-input" placeholder="Search..." autocomplete="off" rows="1"></textarea>
@@ -23,9 +24,9 @@
             </div>
         </div>
         <div class="header-actions">
-            <button id="add-skill" class="hidden">Skills</button>
-            <button id="add-bookmark" class="hidden">Add Link</button>
-            <button id="edit-toggle">Edit</button>
+            <button id="add-skill" class="hidden" tabindex="-1">Skills</button>
+            <button id="add-bookmark" class="hidden" tabindex="-1">Add Link</button>
+            <button id="edit-toggle" tabindex="-1">Edit</button>
         </div>
     </header>
 
