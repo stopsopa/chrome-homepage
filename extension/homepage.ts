@@ -209,6 +209,12 @@ searchClear.addEventListener('click', () => {
     searchInput.focus();
 });
 
+const searchGo = document.getElementById('search-go') as HTMLButtonElement;
+searchGo.addEventListener('click', (e) => {
+    e.preventDefault();
+    handleOpen();
+});
+
 // Global Cmd+Enter and Navigation
 window.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {

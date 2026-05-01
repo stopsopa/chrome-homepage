@@ -180,6 +180,11 @@ searchClear.addEventListener("click", () => {
   searchInput.dispatchEvent(new Event("input"));
   searchInput.focus();
 });
+const searchGo = document.getElementById("search-go");
+searchGo.addEventListener("click", (e) => {
+  e.preventDefault();
+  handleOpen();
+});
 // Global Cmd+Enter and Navigation
 window.addEventListener("keydown", (e) => {
   if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {

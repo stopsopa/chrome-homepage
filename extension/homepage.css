@@ -117,6 +117,29 @@ header {
     display: flex;
     flex-direction: column;
     gap: 4px;
+    margin-top: -12px; /* Move it up as requested */
+}
+
+#search-go {
+    width: 100%;
+    padding: 2px 8px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#search-go:hover {
+    opacity: 0.9;
 }
 
 #engines-bottom-wrapper {
