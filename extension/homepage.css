@@ -94,9 +94,10 @@ header {
 
 #skills-list {
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
     gap: 2px;
-    max-width: 400px;
+    max-height: 58px; /* Fit 2 small rows roughly */
+    flex-wrap: wrap;
 }
 
 .skill-btn {
