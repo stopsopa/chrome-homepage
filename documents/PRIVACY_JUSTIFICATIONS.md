@@ -1,38 +1,36 @@
-# Privacy Justifications for Custom New Tab Redirect
+# Privacy Justifications for Custom New Tab Dashboard
 
 ## Single Purpose Description
 
-Custom New Tab Redirect is a minimalist productivity extension designed to allow users to override their browser's default new tab page with a custom URL of their choice.
+Custom New Tab Dashboard is a privacy-first productivity tool that allows users to replace their default new tab page with a customizable dashboard featuring visual bookmark management, unified AI search, and local prompt management.
 
 ## Detailed Permissions Justifications
 
-### No Special Permissions Required
+### Bookmarks (`bookmarks`)
 
-**Usage**: The extension is built with a zero-permission architecture.
+- **Usage**: The extension creates and manages a dedicated folder (named `_`) within the user's bookmarks.
+- **Justification**: This permission is required to store the user's dashboard links and "AI Skills" (prompts). By using the native bookmark system, the extension ensures that your data is stored locally, can be managed via standard browser tools, and remains entirely under your control without requiring a third-party database.
 
-**Justification**: The extension utilizes standard features available to extension pages:
-- **`chrome_url_overrides`**: Used in `manifest.json` to replace the default `newtab` with `homepage.html`.
-- **`localStorage`**: A standard web API used natively within the extension's `popup.html` and `homepage.html` to save and read the user's custom URL. No `chrome.storage` or external storage permissions are required.
+### Tabs (`tabs`)
 
-**Data Handled**: The extension only saves the single URL string provided by the user. This data is strictly local and is never accessed outside of the extension's own pages.
+- **Usage**: Used to open search results in new tabs.
+- **Justification**: Essential for the multi-select search feature, which allows a single query to be executed across multiple search engines and AI platforms simultaneously, each in its own tab.
+
+### Scripting (`scripting`) and Host Permissions
+
+- **Usage**: Limited to specific AI domains (Gemini, ChatGPT, Claude, T3).
+- **Justification**: Used to optimize the transition between the dashboard and AI search tools. This ensures that the user's search queries and prepended "Skills" are correctly processed by the target platform's interface. Access is strictly limited to the domains required for these specific integrations.
 
 ## Data Usage Compliance
 
 ### Chrome Web Store Policy Compliance
 
-**No Data Collection**: Custom New Tab Redirect does not collect, store, or transmit:
-- Personal information.
-- Browsing history.
-- Analytics or usage statistics.
-
-**Local Processing**: The redirect logic is executed 100% locally within the browser.
-
-**User Control**:
-- Users have full control over the target URL.
-- Users can clear the URL at any time to disable the redirect.
+- **No Remote Data Collection**: The extension does not collect, store, or transmit any personal information, browsing history, or analytics to external servers.
+- **Local Storage**: All settings, link positions, and AI skills are stored locally using the browser's native `localStorage` and `bookmarks` APIs.
+- **No Third-Party Access**: Your data never leaves your machine. We do not use any third-party analytics or tracking tools.
 
 ### Privacy-First Architecture
 
-**Zero Data Principle**: The extension requests zero special permissions. It is fundamentally incapable of tracking users or interacting with standard web pages.
-
-**Transparency**: The source code is extremely minimal, open, and available for inspection. The extension makes zero external network requests.
+- **User Ownership**: Users have full control over all data stored in the `_` bookmark folder. Deleting the folder or clearing `localStorage` completely resets the extension.
+- **Zero Tracking**: The extension makes zero background network requests and does not track user behavior or search history.
+- **Transparency**: The extension is designed to be lightweight and transparent, using standard browser APIs for all its core functionalities.

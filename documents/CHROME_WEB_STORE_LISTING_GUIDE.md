@@ -1,4 +1,4 @@
-# Chrome Web Store Listing Guide for Custom New Tab Redirect
+# Chrome Web Store Listing Guide for Custom New Tab Dashboard
 
 ## Store Listing Form Fields
 
@@ -7,47 +7,59 @@
 #### **Extension Name**
 
 ```
-Custom New Tab Redirect
+Custom New Tab Dashboard & AI Search
 ```
 
 #### **Summary** (132 characters max)
 
 ```
-Redirect your Chrome new tab page to any custom URL instantly. Simple, fast, and completely private.
+A premium, minimal dashboard for your new tab. Organize links, manage AI skills, and search multiple engines simultaneously.
 ```
 
 #### **Description** (16,000 characters max)
 
 ```
-Custom New Tab Redirect is a lightweight, zero-bloat Chrome extension that lets you replace the default new tab page with any custom URL of your choice. 
+Custom New Tab Dashboard is a high-performance, private start page that centralizes your digital workflow. Replace the generic new tab with a sleek, customizable interface designed for speed and productivity.
 
 ## Key Features
 
-⚡ **Instant Redirects**
-- Every time you open a new tab, it instantly redirects to your chosen URL.
-- Blazing fast performance using native browser capabilities.
+🚀 **Unified AI Search**
+- Search multiple AI tools (ChatGPT, Claude, Gemini) and traditional engines simultaneously.
+- Use Command/Cmd + Enter to open all selected tools in separate tabs instantly.
+- Toggle between search engines with ease using a keyboard-first interface.
 
-🛠️ **Simple Configuration**
-- Just click the extension icon to open a clean, straightforward popup.
-- Enter your desired URL and save it instantly.
-- Clear the URL anytime to revert to a simple, blank default page.
+🧠 **AI Skills Management**
+- Create and manage "AI Skills" — custom system prompts that provide context to your queries.
+- Multi-select skills to combine context and prepend them automatically to your AI searches.
+- Fine-grained control: skills are only injected into AI-capable tools, keeping standard searches clean.
 
-🔒 **Privacy First**
-- No special permissions required.
-- Zero tracking, analytics, or external requests.
-- Everything runs 100% locally on your machine using standard browser storage.
+🔗 **Visual Bookmark Grid**
+- Organize your favorite links on a customizable grid.
+- Drag-and-drop reordering with a snap-to-grid system for a perfect layout.
+- Edit titles, URLs, and logos for a personalized visual experience.
+
+⌨️ **Keyboard-Centric Navigation**
+- Optimized for power users with full keyboard support (Tab, Arrows, Cmd+Enter).
+- Section-based navigation ensures you can move between search, tools, and skills without a mouse.
+- Quick-clear search button for a fresh start.
+
+🔒 **Privacy & Data Control**
+- All data is stored locally in your browser's bookmarks and localStorage.
+- Your "AI Skills" and layout settings stay on your machine.
+- No external trackers, no accounts required, and no data collection.
 
 ## How It Works
 
-1. **Install the extension**: Add it to Chrome and pin the icon for easy access.
-2. **Set your URL**: Click the icon, type your favorite website (e.g., Notion, a dashboard, or a search engine), and click Save.
-3. **Open a new tab**: Hit the + button and watch it redirect instantly.
+1. **New Tab Experience**: Every new tab opens your custom dashboard.
+2. **Organize**: Enter "Edit Mode" to drag bookmarks or add new links and AI skills.
+3. **Search**: Type your query, select your preferred engines/skills, and hit Enter.
+4. **Skills**: Select one or more "Skills" (like "Code Expert" or "Creative Writer") to automatically enhance your AI prompts.
 
 ## Perfect For
 
-- Users who want a custom dashboard on every new tab.
-- Anyone looking to replace the default Chrome start page.
-- Power users who value speed and privacy over complex, heavy new tab extensions.
+- Developers and researchers who frequently switch between multiple AI models.
+- Power users who want a clean, aesthetic, and functional start page.
+- Anyone valuing privacy and local data ownership over cloud-synced extensions.
 ```
 
 #### **Category**
@@ -72,8 +84,9 @@ Create and use: `extension/images/icon128.png`
 
 Suggested screenshots to create:
 
-1. **Popup Configuration**: Show the simple popup where the user enters their custom URL.
-2. **Action**: Show a browser window with a new tab opening the user's custom dashboard.
+1. **Main Dashboard**: Show the sleek search bar, engines, and the bookmark grid.
+2. **AI Skills Manager**: Show the side-by-side skill editor with prompt content.
+3. **Multi-Select Search**: Demonstrate selecting multiple AI tools for a single query.
 
 ### Additional Information
 
@@ -92,7 +105,7 @@ https://github.com/stopsopa/chrome-homepage/issues
 #### **Version**
 
 ```
-1.0
+0.1
 ```
 
 ### Privacy & Permissions
@@ -100,15 +113,29 @@ https://github.com/stopsopa/chrome-homepage/issues
 #### **Single Purpose Description**
 
 ```
-A lightweight utility that allows users to seamlessly redirect their new tab page to a custom URL of their choice.
+A premium new tab dashboard that combines visual bookmark management with a unified AI search interface and local prompt management.
 ```
 
 #### **Permission Justifications**
 
-**None**
-
+**bookmarks**
 ```
-The extension requires no special permissions in the manifest. It relies solely on the standard "chrome_url_overrides" for the new tab, and uses standard, sandboxed web localStorage to save the URL.
+Required to store and retrieve your dashboard links and AI skills locally in a specialized folder, ensuring your data is always accessible and private.
+```
+
+**tabs**
+```
+Required to open multiple search engines simultaneously in new tabs when performing a multi-select search.
+```
+
+**scripting**
+```
+Used to enhance interactions with specific AI search tools for a seamless transition from the dashboard.
+```
+
+**host permissions** (`gemini.google.com`, `chatgpt.com`, `claude.ai`, `t3.chat`)
+```
+Required to facilitate a seamless search experience across these AI platforms. These permissions allow the extension to ensure that search queries and prepended "Skills" are correctly handled when opened via the unified dashboard interface. Access is strictly limited to these specific domains.
 ```
 
 #### **Data Usage**
@@ -116,7 +143,7 @@ The extension requires no special permissions in the manifest. It relies solely 
 **What data does your extension collect?**
 
 ```
-No user data is collected. The extension operates entirely locally.
+No user data is collected or transmitted. All configurations (links, skills, search history) are stored entirely within your browser's local storage and bookmarks.
 ```
 
 **How is user data used?**
