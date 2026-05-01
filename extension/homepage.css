@@ -1,0 +1,256 @@
+:root {
+    --bg-color: #0f172a;
+    --text-color: #f8fafc;
+    --input-bg: #1e293b;
+    --accent-color: #38bdf8;
+    --grid-size: 100px;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    margin: 0;
+    overflow: hidden;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+header {
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.search-container {
+    flex: 1;
+    max-width: 800px;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+#search-input {
+    flex: 1;
+    background: var(--input-bg);
+    border: 2px solid transparent;
+    border-radius: 12px;
+    padding: 0.8rem 1.2rem;
+    color: white;
+    font-size: 1.2rem;
+    outline: none;
+    transition: border-color 0.2s;
+    height: 50px;
+    box-sizing: border-box;
+}
+
+#search-input:focus {
+    border-color: var(--accent-color);
+}
+
+#search-engines {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.engine-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: var(--input-bg);
+    transition: opacity 0.2s, transform 0.1s;
+    text-decoration: none;
+}
+
+.engine-link img {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+}
+
+.engine-link.disabled {
+    opacity: 0.3;
+    cursor: default;
+    pointer-events: none;
+}
+
+.engine-link:not(.disabled):hover {
+    background: #334155;
+    transform: translateY(-2px);
+}
+
+#edit-toggle {
+    background: var(--input-bg);
+    border: none;
+    color: var(--text-color);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+#edit-toggle.active {
+    background: var(--accent-color);
+    color: var(--bg-color);
+}
+
+#grid-container {
+    flex: 1;
+    position: relative;
+    overflow: auto;
+    background-image: 
+        radial-gradient(circle, #ffffff05 1px, transparent 1px);
+    background-size: var(--grid-size) var(--grid-size);
+}
+
+body.edit-mode #grid-container {
+    background-image: 
+        linear-gradient(to right, #ffffff05 1px, transparent 1px),
+        linear-gradient(to bottom, #ffffff05 1px, transparent 1px);
+}
+
+.bookmark {
+    position: absolute;
+    width: 200px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px;
+    background: #1e293b80;
+    border-radius: 12px;
+    backdrop-filter: blur(8px);
+    border: 1px solid #ffffff10;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    user-select: none;
+    transition: transform 0.1s;
+}
+
+.bookmark:hover {
+    background: #1e293b;
+    border-color: #ffffff20;
+}
+
+.bookmark-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: #000;
+}
+
+.bookmark-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.bookmark-title {
+    font-size: 0.9rem;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.bookmark-actions {
+    display: none;
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    gap: 4px;
+}
+
+body.edit-mode .bookmark-actions {
+    display: flex;
+}
+
+body.edit-mode .bookmark {
+    cursor: move;
+}
+
+.action-btn {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    color: white;
+}
+
+.btn-del { background: #ef4444; }
+.btn-edit { background: #3b82f6; }
+
+#edit-controls {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+}
+
+.hidden { display: none !important; }
+
+dialog {
+    background: var(--input-bg);
+    border: 1px solid #ffffff20;
+    border-radius: 16px;
+    color: white;
+    padding: 2rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+dialog::backdrop {
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(4px);
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    min-width: 300px;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.field input {
+    background: #0f172a;
+    border: 1px solid #334155;
+    padding: 0.8rem;
+    border-radius: 8px;
+    color: white;
+}
+
+footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+footer button {
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+button[type="submit"] { background: var(--accent-color); color: var(--bg-color); }
+#dialog-cancel { background: #334155; color: white; }

@@ -2,11 +2,49 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>New Tab</title>
+    <title>Home</title>
+    <link rel="stylesheet" href="homepage.css">
     <script type="module" src="homepage.js"></script>
 </head>
 <body>
-    <h1>Custom New Tab</h1>
-    <p>Page rendered locally by extension.</p>
+    <header>
+        <div class="search-container">
+            <input type="text" id="search-input" placeholder="Search..." autofocus autocomplete="off">
+            <nav id="search-engines"></nav>
+        </div>
+        <button id="edit-toggle">Edit</button>
+    </header>
+
+    <main id="grid-container">
+        <!-- Bookmarks will be rendered here -->
+    </main>
+
+    <div id="edit-controls" class="hidden">
+        <button id="add-bookmark">Add Link</button>
+    </div>
+
+    <dialog id="bookmark-dialog">
+        <form id="bookmark-form" method="dialog">
+            <header>
+                <h2 id="dialog-title">Add Bookmark</h2>
+            </header>
+            <div class="field">
+                <label for="f-title">Title</label>
+                <input type="text" id="f-title" name="title" required>
+            </div>
+            <div class="field">
+                <label for="f-url">URL</label>
+                <input type="url" id="f-url" name="url" required>
+            </div>
+            <div class="field">
+                <label for="f-logo">Logo URL</label>
+                <input type="url" id="f-logo" name="logo" required>
+            </div>
+            <footer>
+                <button type="button" id="dialog-cancel">Cancel</button>
+                <button type="submit">Submit</button>
+            </footer>
+        </form>
+    </dialog>
 </body>
 </html>
