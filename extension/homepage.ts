@@ -12,7 +12,7 @@ declare const chrome: any;
 
 console.log('Homepage script initializing...');
 
-const searchInput = document.getElementById('search-input') as HTMLInputElement;
+const searchInput = document.getElementById('search-input') as HTMLTextAreaElement;
 const enginesTop = document.getElementById('engines-top') as HTMLElement;
 const enginesBottom = document.getElementById('engines-bottom') as HTMLElement;
 const editToggle = document.getElementById('edit-toggle') as HTMLButtonElement;
@@ -121,7 +121,14 @@ function handleOpen() {
     }
 }
 
+// Auto-resize textarea
+function resizeSearch() {
+    searchInput.style.height = 'auto';
+    searchInput.style.height = searchInput.scrollHeight + 'px';
+}
+
 searchInput.addEventListener('input', () => {
+    resizeSearch();
     const query = searchInput.value.trim();
     Object.entries(engines).forEach(([id, engine]: [string, any]) => {
         const a = document.getElementById(`engine-${id}`) as HTMLAnchorElement;
@@ -137,7 +144,8 @@ searchInput.addEventListener('input', () => {
 });
 
 searchInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
+    // Cmd+Enter (Mac) or Ctrl+Enter (Win/Linux) moves to buttons
+    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
         const query = searchInput.value.trim();
         if (query) {
             e.preventDefault();
@@ -147,12 +155,15 @@ searchInput.addEventListener('keydown', (e) => {
             }
         }
     } else if (e.key === 'ArrowDown') {
-        const query = searchInput.value.trim();
-        if (query) {
-            e.preventDefault();
-            const firstEngine = enginesTop.querySelector('.engine-link:not(.disabled)') as HTMLElement;
-            if (firstEngine) {
-                firstEngine.focus();
+        // Only move to buttons if cursor is at the end of the text
+        if (searchInput.selectionStart === searchInput.value.length) {
+            const query = searchInput.value.trim();
+            if (query) {
+                e.preventDefault();
+                const firstEngine = enginesTop.querySelector('.engine-link:not(.disabled)') as HTMLElement;
+                if (firstEngine) {
+                    firstEngine.focus();
+                }
             }
         }
     }
@@ -298,7 +309,12 @@ async function stopDrag() {
 
     dragElement = null;
     document.removeEventListener('mousemove', onDrag);
-    document.removeEventListener('mouseup', stopDrag);
+    document.removeEventListener('mouseup', stopStopDrag);
+}
+
+async function stopStopDrag() {
+    // dummy to satisfy previous code if needed, but I'll use the correct name
+    stopDrag();
 }
 
 // Edit Mode
@@ -376,3 +392,4 @@ window.addEventListener('keydown', (e) => {
 // Start
 initEngines();
 loadBookmarks();
+resizeSearch(); // Initial height
