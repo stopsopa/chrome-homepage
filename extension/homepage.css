@@ -304,7 +304,15 @@ body.edit-mode .bookmark-actions {
 .btn-del { background: #ef4444; }
 .btn-edit { background: #3b82f6; }
 
-.hidden { display: none !important; }
+.skills-editor footer button[type="submit"] {
+    background: var(--accent-color);
+    color: white;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+}
 
 /* Dialogs */
 dialog {
@@ -393,23 +401,25 @@ dialog::backdrop {
     flex: 1;
     padding: 2rem;
     background: white;
+    overflow-y: auto;
 }
 
 .skills-editor form {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
-    height: 100%;
 }
 
 .skills-editor textarea {
-    flex: 1;
     background: #f8fafc;
     border: 1px solid var(--border-color);
     padding: 1rem;
     border-radius: 8px;
     resize: none;
     font-family: inherit;
+    min-height: 200px;
+    overflow: hidden;
+    line-height: 1.5;
 }
 
 .danger { background: var(--danger-color) !important; color: white !important; }

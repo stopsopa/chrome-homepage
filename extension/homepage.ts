@@ -31,6 +31,8 @@ const skillsManagerList = document.getElementById('skills-manager-list') as HTML
 const skillForm = document.getElementById('skill-form') as HTMLFormElement;
 const newSkillBtn = document.getElementById('new-skill-btn') as HTMLButtonElement;
 const deleteSkillBtn = document.getElementById('delete-skill-btn') as HTMLButtonElement;
+const skillContent = document.getElementById('skill-content') as HTMLTextAreaElement;
+
 const closeSkillsBtn = document.getElementById('close-skills-btn') as HTMLButtonElement;
 
 let isEditMode = false;
@@ -420,15 +422,26 @@ async function renderSkillsManager() {
 function editSkill(bm: any) {
     const data = decode({ name: bm.title, url: bm.url || '' }) as Bookmark;
     (skillForm.elements.namedItem('title') as HTMLInputElement).value = data.title || '';
-    (skillForm.elements.namedItem('content') as HTMLTextAreaElement).value = data.content || '';
+    skillContent.value = data.content || '';
+    
+    // Auto-expand
+    skillContent.style.height = 'auto';
+    skillContent.style.height = skillContent.scrollHeight + 'px';
+    
     deleteSkillBtn.classList.remove('hidden');
 }
 
 newSkillBtn.addEventListener('click', () => {
     currentSkillId = null;
     skillForm.reset();
+    skillContent.style.height = 'auto'; // Reset height
     deleteSkillBtn.classList.add('hidden');
     renderSkillsManager();
+});
+
+skillContent.addEventListener('input', () => {
+    skillContent.style.height = 'auto';
+    skillContent.style.height = skillContent.scrollHeight + 'px';
 });
 
 skillForm.addEventListener('submit', async (e) => {
