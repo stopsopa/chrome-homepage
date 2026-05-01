@@ -64,6 +64,16 @@ find extension -type f -name '*.ts' | NODE_OPTIONS="" node es.ts
       source: false,
       confirm: false,
     },
+    crop: {
+      command: `
+set -e  
+NODE_OPTIONS="" node crop.ts
+
+      `,
+      description: "crop all icons",
+      source: false,
+      confirm: false,
+    },
 
     ...setup,
   };

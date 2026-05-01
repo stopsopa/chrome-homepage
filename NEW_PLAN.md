@@ -109,4 +109,69 @@ keep all simple, also make it also simple as possible regarding how it will comm
 
 
 
-```
+
+
+# homepage.html
+
+Now we have to have special layout in homepage.html
+
+where top will be reserved for  input field for searching
+
+user will type something there
+and then on the right we will have multiple buttons one next to each other from left to right in order as it is listed in extension/search.ts 
+buttons have to be native <a> tags where href will change as user types
+
+if nothing typed then buttons show disabled state
+and are not functional links
+with href=""
+
+but user should be able to interact with them as with normal links
+which means clicking will take user to that link or right click and open in new tab etc
+
+these are not target="_blank"  but just regular links
+
+Links shold present icons - no text
+style it nice (spacing and generally layout) but keep it simple 
+
+so search will be on top of the page not too big, make input little higher in order to make it easly clickable with mouse (easy to aim)
+
+---
+
+then all rest of the space below will be some kind of grid
+
+in top right corner we will have "edit" button
+
+and once clicked it will activate the edit mode in which we will have additional button "add link"
+and clicking it will open popup window with the form
+
+form will accept 'title' and 'url'
+and 'logo' in the form of a link
+
+and then once user click 'submit' we will place this button on the grid and user will be able to move it around on the grid. and the position on the grid will be saved in the object too as x and y and then this object will be stored using encoding defined in extension/encode.ts and saved as bookmark in "_" folder
+
+as it is done in sandbox
+
+also in edit mode on icon of each bookmark we will show small "x" and "e" buttons
+
+x will allow removing that bookmark and corresponding element from the grid (after confirm())
+
+and 'e" will open the same popup form and populate it with data of that bookmark
+
+and allow to edit
+
+on the grid element will be rendered as an icon from "logo" field and that logo should be resized keeping ratio and cropping where it is needed to make it fit single cell of the grid, 'title' will be on the right taking as much space as needed
+such element will be draggable around by the icon, title will just show always on the right fixed relative to the icon
+
+entire box will be a link which once interacted with will open given "url" in this tab
+
+Important: entire grid will be visible only when entire dashboard is in edit mode dragging around also works only when grid in edit mode
+
+button activating edit mode will be of type toggle
+
+esc button will not cancel, only button
+
+esc button will though dismiss edit popup form.
+
+
+Obviously every time we load homepage.html we have to load all bookmarks from "_" folder
+and position them according to saved "x" "y" attributes.
