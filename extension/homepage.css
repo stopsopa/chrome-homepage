@@ -23,32 +23,33 @@ header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 1rem;
+    gap: 2rem;
     border-bottom: 1px solid var(--border-color);
 }
 
 .search-container {
     flex: 1;
-    max-width: 900px;
+    max-width: 1000px;
 }
 
 .search-wrapper {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    align-items: center;
     gap: 1rem;
 }
 
 #search-input {
-    width: 100%;
+    flex: 1;
     background: var(--input-bg);
     border: 2px solid transparent;
     border-radius: 12px;
-    padding: 0.8rem 1.2rem;
+    padding: 0.6rem 1rem;
     color: var(--text-color);
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     outline: none;
     transition: border-color 0.2s, box-shadow 0.2s;
-    height: 50px;
+    height: 44px;
     box-sizing: border-box;
 }
 
@@ -61,22 +62,21 @@ header {
 #search-engines {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 4px;
 }
 
 .engine-row {
     display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
+    gap: 4px;
 }
 
 .engine-link {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 44px;
-    height: 44px;
-    border-radius: 8px;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
     background: var(--input-bg);
     transition: all 0.2s;
     text-decoration: none;
@@ -85,8 +85,8 @@ header {
 }
 
 .engine-link img {
-    width: 24px;
-    height: 24px;
+    width: 18px;
+    height: 18px;
     object-fit: contain;
 }
 
@@ -99,13 +99,12 @@ header {
 .engine-link:not(.disabled):hover,
 .engine-link:not(.disabled):focus {
     background: #e2e8f0;
-    transform: translateY(-2px);
+    transform: translateY(-1px);
     outline: none;
 }
 
 .engine-link:focus {
     border-color: var(--accent-color);
-    box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1);
 }
 
 .engine-link.selected {
@@ -120,13 +119,13 @@ header {
 .engine-link.selected::after {
     content: '✓';
     position: absolute;
-    top: -4px;
-    right: -4px;
+    top: -3px;
+    right: -3px;
     background: #10b981;
     color: white;
-    font-size: 10px;
-    width: 14px;
-    height: 14px;
+    font-size: 8px;
+    width: 12px;
+    height: 12px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -145,10 +144,11 @@ header {
     background: var(--input-bg);
     border: none;
     color: var(--text-color);
-    padding: 0.5rem 1rem;
+    padding: 0.4rem 0.8rem;
     border-radius: 8px;
     cursor: pointer;
     font-weight: 600;
+    font-size: 0.9rem;
 }
 
 #edit-toggle.active {

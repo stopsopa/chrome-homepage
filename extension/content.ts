@@ -1,6 +1,6 @@
 /** @es.ts
 {
-    mode: "transform",
+    mode: "bundle",
     extension: ".js"
 }
 @es.ts */
