@@ -153,7 +153,7 @@ async function handleOpen() {
                 }
             })
         );
-        skillsPrompt = skillsData.filter(s => s?.content).map(s => s!.content).join('\n\n');
+        skillsPrompt = skillsData.filter(s => s?.content).map(s => s!.content).join('\n-----\n');
     }
 
     const processEngine = (id: string) => {
@@ -289,15 +289,15 @@ async function loadData() {
 
 function renderBookmark(bm: any) {
     const data = decode({ name: bm.title, url: bm.url || '' }) as Bookmark;
-    const div = document.createElement('a');
-    div.className = 'bookmark';
-    div.href = bm.url || '';
-    div.dataset.id = bm.id;
-    div.tabIndex = -1;
-    div.style.left = `${data.x || 100}px`;
-    div.style.top = `${data.y || 100}px`;
+    const a = document.createElement('a');
+    a.className = 'bookmark';
+    a.href = bm.url || '';
+    a.dataset.id = bm.id;
+    a.tabIndex = 0;
+    a.style.left = `${data.x || 100}px`;
+    a.style.top = `${data.y || 100}px`;
 
-    div.innerHTML = `
+    a.innerHTML = `
         <div class="bookmark-icon"><img src="${data.logo || ''}"></div>
         <div class="bookmark-title">${data.title || 'No Title'}</div>
         <div class="bookmark-actions">
@@ -306,19 +306,21 @@ function renderBookmark(bm: any) {
         </div>
     `;
 
-    div.addEventListener('mousedown', startDrag);
-    div.addEventListener('click', (e) => { 
-        e.preventDefault(); 
+    a.addEventListener('mousedown', startDrag);
+    a.addEventListener('click', (e) => { 
+        if (isEditMode) {
+            e.preventDefault();
+        }
     });
 
-    div.querySelector('.btn-edit')!.addEventListener('click', (e) => {
+    a.querySelector('.btn-edit')!.addEventListener('click', (e) => {
         e.preventDefault(); e.stopPropagation(); openEdit(bm.id);
     });
-    div.querySelector('.btn-del')!.addEventListener('click', (e) => {
+    a.querySelector('.btn-del')!.addEventListener('click', (e) => {
         e.preventDefault(); e.stopPropagation(); removeBookmark(bm.id);
     });
 
-    gridContainer.appendChild(div);
+    gridContainer.appendChild(a);
 }
 
 function renderSkill(bm: any, isFirst: boolean) {
