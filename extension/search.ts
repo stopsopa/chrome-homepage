@@ -1,6 +1,26 @@
 function log(msg: string, ...args: any[]) {
   console.log(`chrome-homepage extension ${msg}`, ...args);
 }
+
+let interrupted = false;
+
+if (typeof window !== "undefined") {
+  window.addEventListener(
+    "mousedown",
+    () => {
+      if (!interrupted) {
+        log("user interaction detected - stopping automation");
+        interrupted = true;
+      }
+    },
+    { once: true, capture: true }
+  );
+}
+
+function shouldStop() {
+  return interrupted;
+}
+
 export default {
   chatgpt: {
     position: "bottom",
@@ -22,7 +42,7 @@ export default {
       log(`chatgpt.act(): >${url}< before wait`);
 
       await new Promise((resolve) => setTimeout(resolve, 2000));
-
+      if (shouldStop()) return;
       log(`chatgpt.act(): >${url}< after wait`);
 
       try {
@@ -56,6 +76,7 @@ export default {
     },
     act: async function (url: string) {
       await new Promise((resolve) => setTimeout(resolve, 2000));
+      if (shouldStop()) return;
 
       // extract prompt from url  use new URL()
       const prompt = new URL(url).searchParams.get("prompt");
@@ -75,6 +96,7 @@ export default {
         let attempts = 0;
 
         (function attempt() {
+          if (shouldStop()) return;
           attempts += 1;
 
           if (attempts > 5) {
@@ -127,6 +149,7 @@ export default {
     },
     act: async function (url: string) {
       await new Promise((resolve) => setTimeout(resolve, 2000));
+      if (shouldStop()) return;
 
       // extract prompt from url  use new URL()
       const prompt = new URL(url).searchParams.get("q");
@@ -147,6 +170,7 @@ export default {
         let attempts = 0;
 
         (function attempt() {
+          if (shouldStop()) return;
           attempts += 1;
 
           if (attempts > 5) {
@@ -207,7 +231,8 @@ export default {
       return detect;
     },
     act: async function (url: string) {
-      await new Promise((resolve) => setTimeout(resolve, 2e3));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      if (shouldStop()) return;
 
       // extract prompt from url  use new URL()
       const prompt = new URL(url).searchParams.get("q");
@@ -227,6 +252,7 @@ export default {
         let attempts = 0;
 
         (function attempt() {
+          if (shouldStop()) return;
           attempts += 1;
           if (attempts > 5) {
             log("T3.act(): too many attempts");
