@@ -6,12 +6,13 @@
     <link rel="stylesheet" href="homepage.css">
 </head>
 <body>
-    <header>
+    <header class="gcp-css">
         <div class="search-container">
             <div class="search-hint">press ⌘ + enter to open selected</div>
             <div class="search-wrapper">
-                <div class="textarea-wrapper">
+                <div class="textarea-wrapper input-wrapper">
                     <textarea id="search-input" placeholder="Search..." autocomplete="off" rows="1"></textarea>
+                    <label for="search-input">Search</label>
                     <button id="search-clear" class="hidden" tabindex="-1">&times;</button>
                 </div>
                 <div id="search-engines">
@@ -38,20 +39,20 @@
     </main>
 
     <!-- Bookmark Dialog -->
-    <dialog id="bookmark-dialog">
+    <dialog id="bookmark-dialog" class="gcp-css">
         <form id="bookmark-form" method="dialog">
             <h2 id="dialog-title">Add Bookmark</h2>
-            <div class="field">
+            <div class="field input-wrapper">
+                <input type="text" id="f-title" name="title" placeholder=" " required>
                 <label for="f-title">Title</label>
-                <input type="text" id="f-title" name="title" required>
             </div>
-            <div class="field">
+            <div class="field input-wrapper">
+                <input type="url" id="f-url" name="url" placeholder=" " required>
                 <label for="f-url">URL</label>
-                <input type="url" id="f-url" name="url" required>
             </div>
-            <div class="field">
+            <div class="field input-wrapper">
+                <input type="url" id="f-logo" name="logo" placeholder=" " required>
                 <label for="f-logo">Logo URL</label>
-                <input type="url" id="f-logo" name="logo" required>
             </div>
             <footer class="dialog-footer">
                 <button type="button" id="dialog-cancel" class="btn-secondary">Cancel</button>
@@ -61,7 +62,7 @@
     </dialog>
 
     <!-- Skills Management Dialog -->
-    <dialog id="skills-dialog" class="fullscreen-dialog">
+    <dialog id="skills-dialog" class="fullscreen-dialog gcp-css">
         <div class="skills-manager">
             <aside class="skills-sidebar">
                 <div class="sidebar-header">
@@ -75,13 +76,13 @@
             </aside>
             <section class="skills-editor">
                 <form id="skill-form">
-                    <div class="field">
-                        <label>Skill Title</label>
-                        <input type="text" name="title" id="skill-title" required placeholder="e.g. Code Expert">
+                    <div class="field input-wrapper">
+                        <input type="text" name="title" id="skill-title" required placeholder=" ">
+                        <label for="skill-title">Skill Title</label>
                     </div>
-                    <div class="field skill-content-field">
-                        <label>Prompt Content</label>
-                        <textarea name="content" id="skill-content" required placeholder="Prepend this to your query..."></textarea>
+                    <div class="field skill-content-field input-wrapper">
+                        <textarea name="content" id="skill-content" required placeholder=" "></textarea>
+                        <label for="skill-content">Prompt Content</label>
                     </div>
                     <footer class="dialog-footer">
                         <button type="submit" class="btn-primary">Save Skill</button>
