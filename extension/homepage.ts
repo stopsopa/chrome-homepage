@@ -135,7 +135,6 @@ async function handleOpen() {
     if (!rawQuery) return;
 
     saveToHistory(rawQuery);
-    console.log('handleOpen: prompt saved to history', rawQuery);
 
     const selectedEngines = Array.from(document.querySelectorAll('.engine-link.selected')) as HTMLElement[];
     const active = document.activeElement as HTMLElement;
@@ -606,12 +605,10 @@ skillForm.addEventListener('submit', async (e) => {
 function saveToHistory(prompt: string) {
     if (!prompt || !prompt.trim()) return;
     const KEY = 'chrome_homepage_history_v2';
-    console.log('saveToHistory: saving to', KEY, prompt);
     let history = JSON.parse(localStorage.getItem(KEY) || '[]');
     history = history.filter((p: string) => p !== prompt);
     history.unshift(prompt);
     if (history.length > 10) history.pop();
-    console.log('saveToHistory: final history to save', history);
     localStorage.setItem(KEY, JSON.stringify(history));
 }
 
@@ -661,7 +658,6 @@ function renderHistory() {
 
 historyPopover.addEventListener("toggle", (e: any) => {
   if (e.newState === "open") {
-    console.log("History popover opening, rendering history...");
     renderHistory();
   }
 });
