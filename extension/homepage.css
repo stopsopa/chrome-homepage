@@ -281,14 +281,22 @@ body.edit-mode #grid-container {
 .bookmark-icon img { width: 100%; height: 100%; object-fit: contain; }
 
 .bookmark-actions {
-    display: none;
+    display: flex;
+    gap: 4px;
     position: absolute;
     top: -10px;
     left: -10px;
-    gap: 4px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+    z-index: 10;
 }
 
-body.edit-mode .bookmark-actions { display: flex; }
+body.edit-mode .bookmark:hover .bookmark-actions,
+body.edit-mode .bookmark:focus-within .bookmark-actions {
+    opacity: 1;
+    visibility: visible;
+}
 
 .action-btn {
     width: 20px;
@@ -301,6 +309,12 @@ body.edit-mode .bookmark-actions { display: flex; }
     font-size: 10px;
     color: white;
     cursor: pointer;
+    transition: transform 0.1s ease, filter 0.1s ease;
+}
+
+.action-btn:hover {
+    transform: scale(1.2);
+    filter: brightness(1.1);
 }
 
 .btn-del { background: var(--danger-color); }
