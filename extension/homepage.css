@@ -133,24 +133,7 @@ header {
 
 #search-go {
   width: 100%;
-  padding: 2px 8px;
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  background: var(--accent-color);
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: opacity 0.2s;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-#search-go:hover {
-  opacity: 0.9;
+  margin-top: 4px;
 }
 
 #engines-bottom-wrapper {
@@ -565,4 +548,13 @@ dialog::backdrop {
       }
     }
   }
+}
+
+[id="search-go"] {
+  height: 22px;
+}
+#skills-list button {
+  height: 13px;
+  font-size: 9px;
+  padding: 2px;
 }
