@@ -593,10 +593,14 @@ resizeSearch();
 
 // Shrink/Expand behavior
 document.addEventListener("mousedown", (e) => {
-  if (!e.target.closest(".search-container")) {
+  const isInput = e.target === searchInput;
+  const isAction = e.target.closest("button") || e.target.closest(".engine-link") || e.target.closest("label");
+  
+  if (!isInput && !isAction) {
     searchInput.classList.add("shrunk");
+    searchInput.blur();
   }
-});
+}, true);
 
 searchInput.addEventListener("focus", () => {
   searchInput.classList.remove("shrunk");
