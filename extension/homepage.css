@@ -568,10 +568,10 @@ dialog::backdrop {
   overflow: hidden;
   line-height: 1.5;
 }
-.gcp-css {
-  & .input-wrapper,
-  &.input-wrapper {
-    & textarea {
+.gcp-css:not(.no-gcp) {
+  & .input-wrapper:not(.no-gcp),
+  &.input-wrapper:not(.no-gcp) {
+    & textarea:not(.no-gcp) {
       & + label[for="search-input"] {
         margin-top: 13px;
       }
