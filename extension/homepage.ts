@@ -674,3 +674,17 @@ if (savedQuery) {
 }
 
 resizeSearch();
+
+// Shrink behavior
+gridContainer.addEventListener('mousedown', (e) => {
+    if (e.target === gridContainer || (e.target as HTMLElement).closest('.bookmark')) {
+        searchInput.classList.add('shrunk');
+    }
+});
+
+searchInput.addEventListener('focus', () => {
+    if (searchInput.classList.contains('shrunk')) {
+        searchInput.classList.remove('shrunk');
+        resizeSearch();
+    }
+});
