@@ -56,12 +56,22 @@ header {
 }
 
 .search-hint {
+  /* display: flex; */
+  justify-content: space-between;
+  align-items: center;
   font-size: 10px;
   color: #94a3b8;
   margin-bottom: 4px;
   font-weight: 500;
-  pointer-events: none;
   z-index: 300;
+}
+
+#history-btn {
+  height: 13px;
+  font-size: 9px;
+  padding: 2px;
+  margin: 0;
+  pointer-events: auto;
 }
 
 .search-wrapper {
@@ -571,4 +581,91 @@ dialog::backdrop {
   height: 13px;
   font-size: 9px;
   padding: 2px;
+}
+/* History Popover */
+#history-popover {
+  border-radius: 12px;
+  padding: 0;
+  border: 1px solid var(--border-color);
+  background: white;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  width: 600px;
+  height: 400px;
+}
+
+.history-content {
+  display: flex;
+  height: 100%;
+}
+
+.history-list-section {
+  width: 250px;
+  border-right: 1px solid var(--border-color);
+  overflow-y: auto;
+  background: #f8fafc;
+}
+
+.history-preview-section {
+  flex: 1;
+  padding: 1rem;
+  overflow-y: auto;
+  background: white;
+}
+
+#history-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.history-item {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border-color);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  transition: background 0.2s;
+}
+
+.history-item:hover {
+  background: #f1f5f9;
+}
+
+.history-item.active {
+  background: #e2e8f0;
+  font-weight: 600;
+}
+
+.history-item-text {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-right: 8px;
+}
+
+.history-item .use-btn {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid var(--accent-color);
+  background: white;
+  color: var(--accent-color);
+  cursor: pointer;
+}
+
+.history-item .use-btn:hover {
+  background: var(--accent-color);
+  color: white;
+}
+
+#history-preview {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-all;
+  font-family: inherit;
+  font-size: 0.9rem;
+  color: #334155;
 }

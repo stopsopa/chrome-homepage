@@ -4,11 +4,15 @@
     <meta charset="utf-8" />
     <title>Home</title>
     <link rel="stylesheet" href="homepage.css" />
+    <link rel="stylesheet" href="popover.css" />
   </head>
   <body>
     <header class="gcp-css">
       <div class="search-container">
-        <div class="search-hint">press ⌘ + enter to open selected</div>
+        <div class="search-hint">
+          press ⌘ + enter to open selected
+          <button id="history-btn" class="skill-btn active" popovertarget="history-popover" tabindex="-1">History</button>
+        </div>
         <div class="search-wrapper">
           <div class="textarea-wrapper input-wrapper">
             <textarea id="search-input" placeholder="Search..." autocomplete="off" rows="1"></textarea>
@@ -93,6 +97,18 @@
         </section>
       </div>
     </dialog>
+
+    <!-- History Popover -->
+    <div id="history-popover" popover data-popover class="bottom-right">
+      <div class="history-content">
+        <div class="history-list-section">
+          <div id="history-list"></div>
+        </div>
+        <div class="history-preview-section">
+          <pre id="history-preview"></pre>
+        </div>
+      </div>
+    </div>
 
     <script type="module" src="homepage.js"></script>
   </body>

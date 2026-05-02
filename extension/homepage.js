@@ -24,6 +24,10 @@ const skillForm = document.getElementById("skill-form");
 const newSkillBtn = document.getElementById("new-skill-btn");
 const skillContent = document.getElementById("skill-content");
 const closeSkillsBtn = document.getElementById("close-skills-btn");
+const historyList = document.getElementById("history-list");
+const historyPreview = document.getElementById("history-preview");
+const historyPopover = document.getElementById("history-popover");
+const historyBtn = document.getElementById("history-btn");
 let isEditMode = false;
 let currentFolderId = null;
 let currentEditId = null;
@@ -109,6 +113,8 @@ function initEngines() {
 async function handleOpen() {
   const rawQuery = searchInput.value.trim();
   if (!rawQuery) return;
+  saveToHistory(rawQuery);
+  console.log('handleOpen: prompt saved to history', rawQuery);
   const selectedEngines = Array.from(document.querySelectorAll(".engine-link.selected"));
   const active = document.activeElement;
   let targetEngines = selectedEngines;
@@ -143,7 +149,11 @@ ${rawQuery}`;
   };
   if (targetEngines.length === 1) {
     const id = targetEngines[0].id.replace("engine-", "");
-    window.location.href = processEngine(id);
+    const url = processEngine(id);
+    console.log('handleOpen: single engine redirecting to', url);
+    setTimeout(() => {
+      window.location.href = url;
+    }, 100);
   } else {
     targetEngines.forEach((el) => {
       const id = el.id.replace("engine-", "");
@@ -518,9 +528,65 @@ skillForm.addEventListener("submit", async (e) => {
   renderSkillsManager();
   loadData();
 });
+// History logic
+function saveToHistory(prompt) {
+  if (!prompt || !prompt.trim()) return;
+  const KEY = 'chrome_homepage_history_v2';
+  console.log('saveToHistory: saving to', KEY, prompt);
+  let history = JSON.parse(localStorage.getItem(KEY) || "[]");
+  history = history.filter((p) => p !== prompt);
+  history.unshift(prompt);
+  if (history.length > 10) history.pop();
+  console.log('saveToHistory: final history to save', history);
+  localStorage.setItem(KEY, JSON.stringify(history));
+}
+function renderHistory() {
+  const KEY = 'chrome_homepage_history_v2';
+  const history = JSON.parse(localStorage.getItem(KEY) || "[]");
+  historyList.innerHTML = "";
+  if (history.length === 0) {
+    historyList.innerHTML = '<div style="padding: 1rem; color: #94a3b8; font-size: 0.85rem;">No history yet</div>';
+    historyPreview.textContent = "";
+    return;
+  }
+  history.forEach((prompt, index) => {
+    const item = document.createElement("div");
+    item.className = "history-item";
+    item.innerHTML = `
+            <div class="history-item-text">${prompt}</div>
+            <button class="use-btn">use</button>
+        `;
+    item.onclick = () => {
+      Array.from(historyList.children).forEach((c) => c.classList.remove("active"));
+      item.classList.add("active");
+      historyPreview.textContent = prompt;
+    };
+    item.querySelector(".use-btn").addEventListener("click", (e) => {
+      e.stopPropagation();
+      searchInput.value = prompt;
+      searchInput.dispatchEvent(new Event("input"));
+      resizeSearch();
+      if (historyPopover.hidePopover) {
+        historyPopover.hidePopover();
+      }
+      searchInput.focus();
+    });
+    historyList.appendChild(item);
+    if (index === 0) {
+      item.click();
+    }
+  });
+}
+historyPopover.addEventListener("toggle", (e) => {
+  if (e.newState === "open") {
+    console.log("History popover opening, rendering history...");
+    renderHistory();
+  }
+});
 // Start
 initEngines();
 loadData();
+renderHistory();
 // Restore search
 const savedQuery = localStorage.getItem("search_query");
 if (savedQuery) {
