@@ -162,10 +162,11 @@ header {
 
 #skills-list {
   display: flex;
-  flex-direction: column;
   gap: 2px;
   max-height: 58px; /* Fit 2 small rows roughly */
   flex-wrap: wrap;
+  width: 237px;
+  align-content: flex-start;
 }
 
 .skill-btn {
