@@ -167,6 +167,11 @@ header {
   flex-wrap: wrap;
   width: 237px;
   align-content: flex-start;
+  .skill-btn:not(.active) {
+    background: white;
+    color: gray;
+    border: 1px solid gray;
+  }
 }
 
 .skill-btn {
