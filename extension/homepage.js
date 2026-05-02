@@ -591,10 +591,14 @@ if (savedQuery) {
 }
 resizeSearch();
 
-// Shrink behavior
-gridContainer.addEventListener("mousedown", (e) => {
-  if (e.target === gridContainer || e.target.closest(".bookmark")) {
+// Shrink/Expand behavior
+document.addEventListener("mousedown", (e) => {
+  const isSearchInput = e.target === searchInput;
+  const isSearchContainer = e.target.closest(".search-container");
+  
+  if (!isSearchContainer && !isSearchInput) {
     searchInput.classList.add("shrunk");
+    searchInput.blur();
   }
 });
 
