@@ -268,7 +268,19 @@ body.edit-mode #grid-container {
     text-decoration: none;
     color: inherit;
     outline: none;
+    padding: 0 8px;
+    margin-left: -8px;
+    border-radius: 8px;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
+
+.bookmark:hover {
+    cursor: pointer;
+    background-color: #f1f5f9;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transform: translateY(-1px);
+}
+
 
 .bookmark-icon {
     width: 36px;
