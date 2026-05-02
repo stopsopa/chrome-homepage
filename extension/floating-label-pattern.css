@@ -26,9 +26,9 @@ g(Google Sans font)
 }
 */
 
-.gcp-css {
-  & :is(a),
-  &:is(a) {
+.gcp-css:not(.no-gcp) {
+  & :is(a):not(.no-gcp),
+  &:is(a):not(.no-gcp) {
     color: rgb(12, 103, 223);
     /* border-bottom: 1px solid currentColor; */
     text-decoration: none;
@@ -51,15 +51,15 @@ g(Google Sans font)
       }
     }
   }
-  & :is(h2),
-  &:is(h2) {
+  & :is(h2):not(.no-gcp),
+  &:is(h2):not(.no-gcp) {
     font-size: 14px;
     margin-bottom: 5px;
     font-weight: 500;
     color: #202124d4;
   }
-  & :is(p),
-  &:is(p) {
+  & :is(p):not(.no-gcp),
+  &:is(p):not(.no-gcp) {
     font-size: 14px;
     margin-bottom: 10px;
     font-weight: 400;
@@ -71,8 +71,8 @@ g(Google Sans font)
   /* -------------------------------------------------------------
      BUTTONS
      ------------------------------------------------------------- */
-  & :is(input[type="submit"], input[type="button"], button),
-  &:is(input[type="submit"], input[type="button"], button) {
+  & :is(input[type="submit"], input[type="button"], button):not(.no-gcp),
+  &:is(input[type="submit"], input[type="button"], button):not(.no-gcp) {
     font-family: inherit;
     font-size: 14px;
     font-weight: normal;
@@ -164,8 +164,8 @@ g(Google Sans font)
     }
   }
 
-  & [data-error],
-  &[data-error] {
+  & [data-error]:not(.no-gcp),
+  &[data-error]:not(.no-gcp) {
     /* .helper-text {
       display: none;
     } */
@@ -176,8 +176,8 @@ g(Google Sans font)
     }
   }
 
-  & .hide-helper,
-  &.hide-helper {
+  & .hide-helper:not(.no-gcp),
+  &.hide-helper:not(.no-gcp) {
     .helper-text {
       display: none;
     }
@@ -186,8 +186,8 @@ g(Google Sans font)
   /* -------------------------------------------------------------
      STANDARD FLOATING LABELS (Inputs, Textareas)
      ------------------------------------------------------------- */
-  & .input-wrapper,
-  &.input-wrapper {
+  & .input-wrapper:not(.no-gcp),
+  &.input-wrapper:not(.no-gcp) {
     position: relative;
     display: grid;
     margin-bottom: 19px;
@@ -253,9 +253,9 @@ g(Google Sans font)
       transform: translateY(0);
     }
 
-    input,
-    textarea,
-    select {
+    input:not(.no-gcp),
+    textarea:not(.no-gcp),
+    select:not(.no-gcp) {
       grid-area: 1 / 1;
       width: 100%;
       border: none;
@@ -288,7 +288,7 @@ g(Google Sans font)
       }
     }
 
-    select {
+    select:not(.no-gcp) {
       padding-right: 30px;
       cursor: pointer;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%235f6368'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
@@ -307,7 +307,7 @@ g(Google Sans font)
       }
     }
 
-    textarea {
+    textarea:not(.no-gcp) {
       resize: vertical;
       font-family: inherit;
 
@@ -317,11 +317,11 @@ g(Google Sans font)
       }
     }
 
-    & [data-error],
-    &[data-error] {
-      input,
-      textarea,
-      select {
+    & [data-error]:not(.no-gcp),
+    &[data-error]:not(.no-gcp) {
+      input:not(.no-gcp),
+      textarea:not(.no-gcp),
+      select:not(.no-gcp) {
         color: var(--gcp-css-error);
       }
     }
@@ -330,8 +330,8 @@ g(Google Sans font)
   /* -------------------------------------------------------------
      CHECKBOX & RADIO PATTERNS
      ------------------------------------------------------------- */
-  & :is(.checkbox-wrapper, .radio-wrapper),
-  &:is(.checkbox-wrapper, .radio-wrapper) {
+  & :is(.checkbox-wrapper, .radio-wrapper):not(.no-gcp),
+  &:is(.checkbox-wrapper, .radio-wrapper):not(.no-gcp) {
     position: relative;
     display: grid;
     margin-bottom: 19px;
@@ -339,15 +339,15 @@ g(Google Sans font)
       padding-top: 0;
     }
 
-    .checkbox-row,
-    .radio-row {
+    .checkbox-row:not(.no-gcp),
+    .radio-row:not(.no-gcp) {
       grid-row: 1; /* Match normal input cell */
       display: flex;
       align-items: flex-start;
       gap: 12px;
     }
 
-    .content-cell {
+    .content-cell:not(.no-gcp) {
       display: flex;
       flex-direction: column;
       gap: 4px;
@@ -369,9 +369,9 @@ g(Google Sans font)
       color: var(--gcp-css-primary);
     }
 
-    & [data-error],
-    &[data-error] {
-      label {
+    & [data-error]:not(.no-gcp),
+    &[data-error]:not(.no-gcp) {
+      label:not(.no-gcp) {
         color: var(--gcp-css-error);
       }
 
@@ -408,8 +408,8 @@ g(Google Sans font)
       }
     }
 
-    & .checkbox-wrapper,
-    &.checkbox-wrapper {
+    & .checkbox-wrapper:not(.no-gcp),
+    &.checkbox-wrapper:not(.no-gcp) {
       position: relative;
       display: grid;
       margin-bottom: 19px;
@@ -437,8 +437,8 @@ g(Google Sans font)
       }
     }
 
-    & .radio-wrapper,
-    &.radio-wrapper {
+    & .radio-wrapper:not(.no-gcp),
+    &.radio-wrapper:not(.no-gcp) {
       position: relative;
       display: grid;
       margin-bottom: 19px;
@@ -464,8 +464,8 @@ g(Google Sans font)
         }
       }
 
-      & [data-error],
-      &[data-error] {
+      & [data-error]:not(.no-gcp),
+      &[data-error]:not(.no-gcp) {
         input[type="radio"] {
           border-color: var(--gcp-css-error);
           &::before {
