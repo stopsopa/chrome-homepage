@@ -1,97 +1,99 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-    <meta charset="utf-8">
+  <head>
+    <meta charset="utf-8" />
     <title>Home</title>
-    <link rel="stylesheet" href="homepage.css">
-</head>
-<body>
+    <link rel="stylesheet" href="homepage.css" />
+  </head>
+  <body>
     <header class="gcp-css">
-        <div class="search-container">
-            <div class="search-hint">press ⌘ + enter to open selected</div>
-            <div class="search-wrapper">
-                <div class="textarea-wrapper input-wrapper">
-                    <textarea id="search-input" placeholder="Search..." autocomplete="off" rows="1"></textarea>
-                    <label for="search-input">Search</label>
-                    <button id="search-clear" class="hidden" tabindex="-1">&times;</button>
-                </div>
-                <div id="search-engines">
-                    <div id="engines-top" class="engine-row"></div>
-                    <div id="engines-bottom-wrapper">
-                        <div id="engines-bottom" class="engine-row"></div>
-                        <div id="skills-list"></div>
-                    </div>
-                    <div id="go-row" class="engine-row">
-                        <button id="search-go" title="Open selected (⌘ + Enter)">Open</button>
-                    </div>
-                </div>
+      <div class="search-container">
+        <div class="search-hint">press ⌘ + enter to open selected</div>
+        <div class="search-wrapper">
+          <div class="textarea-wrapper input-wrapper">
+            <textarea id="search-input" placeholder="Search..." autocomplete="off" rows="1"></textarea>
+            <label for="search-input">Search</label>
+            <button id="search-clear" class="hidden" tabindex="-1">&times;</button>
+          </div>
+          <div id="search-engines">
+            <div id="rows">
+              <div id="engines-top" class="engine-row"></div>
+              <div id="engines-bottom-wrapper">
+                <div id="engines-bottom" class="engine-row"></div>
+              </div>
+              <div id="go-row" class="engine-row">
+                <button id="search-go" title="Open selected (⌘ + Enter)">Open</button>
+              </div>
             </div>
+            <div id="skills-list"></div>
+          </div>
         </div>
-        <div class="header-actions">
-            <button id="add-skill" class="hidden" tabindex="-1">Skills</button>
-            <button id="add-bookmark" class="hidden" tabindex="-1">Add Link</button>
-            <button id="edit-toggle" tabindex="-1">Edit</button>
-        </div>
+      </div>
+      <div class="header-actions">
+        <button id="add-skill" class="hidden" tabindex="-1">Skills</button>
+        <button id="add-bookmark" class="hidden" tabindex="-1">Add Link</button>
+        <button id="edit-toggle" tabindex="-1">Edit</button>
+      </div>
     </header>
 
     <main id="grid-container">
-        <!-- Bookmarks will be rendered here -->
+      <!-- Bookmarks will be rendered here -->
     </main>
 
     <!-- Bookmark Dialog -->
     <dialog id="bookmark-dialog" class="gcp-css">
-        <form id="bookmark-form" method="dialog">
-            <h2 id="dialog-title">Add Bookmark</h2>
-            <div class="field input-wrapper">
-                <input type="text" id="f-title" name="title" placeholder=" " required>
-                <label for="f-title">Title</label>
-            </div>
-            <div class="field input-wrapper">
-                <input type="url" id="f-url" name="url" placeholder=" " required>
-                <label for="f-url">URL</label>
-            </div>
-            <div class="field input-wrapper">
-                <input type="url" id="f-logo" name="logo" placeholder=" " required>
-                <label for="f-logo">Logo URL</label>
-            </div>
-            <footer class="dialog-footer">
-                <button type="button" id="dialog-cancel" class="btn-secondary">Cancel</button>
-                <button type="submit" class="btn-primary">Submit</button>
-            </footer>
-        </form>
+      <form id="bookmark-form" method="dialog">
+        <h2 id="dialog-title">Add Bookmark</h2>
+        <div class="field input-wrapper">
+          <input type="text" id="f-title" name="title" placeholder=" " required />
+          <label for="f-title">Title</label>
+        </div>
+        <div class="field input-wrapper">
+          <input type="url" id="f-url" name="url" placeholder=" " required />
+          <label for="f-url">URL</label>
+        </div>
+        <div class="field input-wrapper">
+          <input type="url" id="f-logo" name="logo" placeholder=" " required />
+          <label for="f-logo">Logo URL</label>
+        </div>
+        <footer class="dialog-footer">
+          <button type="button" id="dialog-cancel" class="btn-secondary">Cancel</button>
+          <button type="submit" class="btn-primary">Submit</button>
+        </footer>
+      </form>
     </dialog>
 
     <!-- Skills Management Dialog -->
     <dialog id="skills-dialog" class="fullscreen-dialog gcp-css">
-        <div class="skills-manager">
-            <aside class="skills-sidebar">
-                <div class="sidebar-header">
-                    <h3>Skills</h3>
-                    <button id="new-skill-btn" class="btn-success">Add New</button>
-                </div>
-                <div id="skills-manager-list"></div>
-                <div class="sidebar-footer">
-                    <button id="close-skills-btn" class="btn-secondary">Close</button>
-                </div>
-            </aside>
-            <section class="skills-editor">
-                <form id="skill-form">
-                    <div class="field input-wrapper">
-                        <input type="text" name="title" id="skill-title" required placeholder=" ">
-                        <label for="skill-title">Skill Title</label>
-                    </div>
-                    <div class="field skill-content-field input-wrapper">
-                        <textarea name="content" id="skill-content" required placeholder=" "></textarea>
-                        <label for="skill-content">Prompt Content</label>
-                    </div>
-                    <footer class="dialog-footer">
-                        <button type="submit" class="btn-primary">Save Skill</button>
-                    </footer>
-                </form>
-            </section>
-        </div>
+      <div class="skills-manager">
+        <aside class="skills-sidebar">
+          <div class="sidebar-header">
+            <h3>Skills</h3>
+            <button id="new-skill-btn" class="btn-success">Add New</button>
+          </div>
+          <div id="skills-manager-list"></div>
+          <div class="sidebar-footer">
+            <button id="close-skills-btn" class="btn-secondary">Close</button>
+          </div>
+        </aside>
+        <section class="skills-editor">
+          <form id="skill-form">
+            <div class="field input-wrapper">
+              <input type="text" name="title" id="skill-title" required placeholder=" " />
+              <label for="skill-title">Skill Title</label>
+            </div>
+            <div class="field skill-content-field input-wrapper">
+              <textarea name="content" id="skill-content" required placeholder=" "></textarea>
+              <label for="skill-content">Prompt Content</label>
+            </div>
+            <footer class="dialog-footer">
+              <button type="submit" class="btn-primary">Save Skill</button>
+            </footer>
+          </form>
+        </section>
+      </div>
     </dialog>
 
     <script type="module" src="homepage.js"></script>
-</body>
+  </body>
 </html>

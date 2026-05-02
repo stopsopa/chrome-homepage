@@ -119,21 +119,33 @@ header {
   border-radius: 50%;
   transition: background 0.2s;
 }
+#engines-top {
+  gap: 11px;
+}
 
+#rows {
+  display: flex;
+  gap: 10px;
+  flex-direction: column;
+}
+#engines-bottom {
+  gap: 11px;
+}
 #search-clear:hover {
   background: rgba(0, 0, 0, 0.05);
 }
 
 #search-engines {
   display: flex;
-  flex-direction: column;
+
   gap: 4px;
   margin-top: -12px; /* Move it up as requested */
+  flex-direction: row;
 }
 
 #search-go {
   width: 100%;
-  margin-top: 4px;
+  /* margin-top: 4px; */
 }
 
 #engines-bottom-wrapper {
