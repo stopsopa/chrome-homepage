@@ -198,6 +198,17 @@ header {
   white-space: nowrap;
   transition: all 0.2s;
   color: #64748b;
+  outline: none;
+}
+
+.skill-btn:focus,
+.header-actions button:focus,
+.dialog-footer button:focus,
+.sidebar-header button:focus,
+.sidebar-footer button:focus,
+#search-go:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--accent-color);
 }
 
 .skill-btn.active {
