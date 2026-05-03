@@ -12,6 +12,14 @@ declare const chrome: any;
 
 console.log('Homepage script initializing...');
 
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js').then(reg => {
+        console.log('SW registered', reg);
+    }).catch(err => {
+        console.error('SW registration failed', err);
+    });
+}
+
 const searchInput = document.getElementById('search-input') as HTMLTextAreaElement;
 const searchClear = document.getElementById('search-clear') as HTMLButtonElement;
 const enginesTop = document.getElementById('engines-top') as HTMLElement;
@@ -282,6 +290,24 @@ async function loadData() {
     const folderId = await getFolder();
     const items = await chrome.bookmarks.getChildren(folderId);
     
+    // Cache flushing logic
+    const iconUrls = items.map((item: any) => {
+        try {
+            const data = decode({ name: item.title, url: item.url || '' }) as Bookmark;
+            return data.logo || '';
+        } catch (e) {
+            return '';
+        }
+    }).filter(Boolean).sort().join('|');
+
+    if (localStorage.getItem('icon_cache_hash') !== iconUrls) {
+        if ('caches' in window) {
+            console.log('Icons changed or new icon introduced, flushing cache...');
+            await caches.delete('images');
+        }
+        localStorage.setItem('icon_cache_hash', iconUrls);
+    }
+
     gridContainer.innerHTML = '';
     skillsList.innerHTML = '';
     
