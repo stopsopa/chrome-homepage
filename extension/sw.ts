@@ -28,15 +28,14 @@ self.addEventListener('fetch', (event: any) => {
                 try {
                     const response = await fetch(request);
                     
-                    // Only cache successful external/local images
-                    // Avoid caching things that are not 200 (like 404s)
-                    if (response && response.status === 200) {
+                    // Cache successful responses (200) OR opaque responses (0)
+                    // Opaque responses are common for cross-origin images without CORS
+                    if (response && (response.status === 200 || response.status === 0)) {
                         cache.put(request, response.clone());
                     }
                     
                     return response;
                 } catch (error) {
-                    // Fallback or just return error
                     return fetch(request);
                 }
             })

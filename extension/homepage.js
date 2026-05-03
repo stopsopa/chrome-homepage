@@ -6,6 +6,13 @@
 @es.ts */import { serialize, decode } from "./modules.js";
 import engines from "./search.js";
 console.log("Homepage script initializing...");
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("./sw.js").then((reg) => {
+    console.log("SW registered", reg);
+  }).catch((err) => {
+    console.error("SW registration failed", err);
+  });
+}
 const searchInput = document.getElementById("search-input");
 const searchClear = document.getElementById("search-clear");
 const enginesTop = document.getElementById("engines-top");
@@ -149,7 +156,7 @@ ${rawQuery}`;
   if (targetEngines.length === 1) {
     const id = targetEngines[0].id.replace("engine-", "");
     const url = processEngine(id);
-    console.log('handleOpen: single engine redirecting to', url);
+    console.log("handleOpen: single engine redirecting to", url);
     setTimeout(() => {
       window.location.href = url;
     }, 100);
@@ -243,6 +250,22 @@ async function getFolder() {
 async function loadData() {
   const folderId = await getFolder();
   const items = await chrome.bookmarks.getChildren(folderId);
+  // Cache flushing logic
+  const iconUrls = items.map((item) => {
+    try {
+      const data = decode({ name: item.title, url: item.url || "" });
+      return data.logo || "";
+    } catch (e) {
+      return "";
+    }
+  }).filter(Boolean).sort().join("|");
+  if (localStorage.getItem("icon_cache_hash") !== iconUrls) {
+    if ("caches" in window) {
+      console.log("Icons changed or new icon introduced, flushing cache...");
+      await caches.delete("images");
+    }
+    localStorage.setItem("icon_cache_hash", iconUrls);
+  }
   gridContainer.innerHTML = "";
   skillsList.innerHTML = "";
   const bookmarks = [];
@@ -530,7 +553,7 @@ skillForm.addEventListener("submit", async (e) => {
 // History logic
 function saveToHistory(prompt) {
   if (!prompt || !prompt.trim()) return;
-  const KEY = 'chrome_homepage_history_v2';
+  const KEY = "chrome_homepage_history_v2";
   let history = JSON.parse(localStorage.getItem(KEY) || "[]");
   history = history.filter((p) => p !== prompt);
   history.unshift(prompt);
@@ -538,7 +561,7 @@ function saveToHistory(prompt) {
   localStorage.setItem(KEY, JSON.stringify(history));
 }
 function renderHistory() {
-  const KEY = 'chrome_homepage_history_v2';
+  const KEY = "chrome_homepage_history_v2";
   const history = JSON.parse(localStorage.getItem(KEY) || "[]");
   historyList.innerHTML = "";
   if (history.length === 0) {
@@ -582,7 +605,6 @@ historyPopover.addEventListener("toggle", (e) => {
 // Start
 initEngines();
 loadData();
-renderHistory();
 // Restore search
 const savedQuery = localStorage.getItem("search_query");
 if (savedQuery) {
@@ -590,19 +612,15 @@ if (savedQuery) {
   searchClear.classList.toggle("hidden", !savedQuery);
 }
 resizeSearch();
-
-// Shrink/Expand behavior
-document.addEventListener("mousedown", (e) => {
-  const isInput = e.target === searchInput;
-  const isAction = e.target.closest("button") || e.target.closest(".engine-link") || e.target.closest("label");
-  
-  if (!isInput && !isAction) {
+// Shrink behavior
+gridContainer.addEventListener("mousedown", (e) => {
+  if (e.target === gridContainer || e.target.closest(".bookmark")) {
     searchInput.classList.add("shrunk");
-    searchInput.blur();
   }
-}, true);
-
+});
 searchInput.addEventListener("focus", () => {
-  searchInput.classList.remove("shrunk");
-  resizeSearch();
+  if (searchInput.classList.contains("shrunk")) {
+    searchInput.classList.remove("shrunk");
+    resizeSearch();
+  }
 });
