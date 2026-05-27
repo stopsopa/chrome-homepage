@@ -12,6 +12,20 @@ if ("serviceWorker" in navigator) {
   }).catch((err) => {
     console.error("SW registration failed", err);
   });
+  navigator.serviceWorker.addEventListener("message", (event) => {
+    if (event.data && event.data.type === "SW_IMAGE_STATUS") {
+      const { url, status, error } = event.data;
+      if (status === "HIT") {
+        console.log(`%c[SW CACHE HIT] %c${url}`, "color: #10b981; font-weight: bold;", "color: inherit;");
+      } else if (status === "MISS_CACHED") {
+        console.log(`%c[SW CACHE SAVE] %c${url}`, "color: #3b82f6; font-weight: bold;", "color: inherit;");
+      } else if (status === "MISS_NOT_CACHED") {
+        console.log(`%c[SW BYPASS NO-CACHE] %c${url}`, "color: #f59e0b; font-weight: bold;", "color: inherit;");
+      } else if (status === "ERROR_FALLBACK") {
+        console.log(`%c[SW ERROR FALLBACK] %c${url} %c(Error: ${error || "Unknown"})`, "color: #ef4444; font-weight: bold;", "color: inherit;", "color: #ef4444; font-style: italic;");
+      }
+    }
+  });
 }
 const searchInput = document.getElementById("search-input");
 const searchClear = document.getElementById("search-clear");
@@ -22,6 +36,7 @@ const editToggle = document.getElementById("edit-toggle");
 const gridContainer = document.getElementById("grid-container");
 const addBtn = document.getElementById("add-bookmark");
 const addSkillBtn = document.getElementById("add-skill");
+const clearCacheBtn = document.getElementById("clear-cache");
 const bookmarkDialog = document.getElementById("bookmark-dialog");
 const bookmarkForm = document.getElementById("bookmark-form");
 const dialogCancel = document.getElementById("dialog-cancel");
@@ -406,6 +421,15 @@ editToggle.addEventListener("click", () => {
   editToggle.classList.toggle("active", isEditMode);
   addBtn.classList.toggle("hidden", !isEditMode);
   addSkillBtn.classList.toggle("hidden", !isEditMode);
+  clearCacheBtn.classList.toggle("hidden", !isEditMode);
+});
+// Clear Cache
+clearCacheBtn.addEventListener("click", async () => {
+  if ("caches" in window) {
+    await caches.delete("images");
+    localStorage.removeItem("icon_cache_hash");
+    console.log("Image cache cleared.");
+  }
 });
 // Bookmark Dialog
 addBtn.addEventListener("click", () => {

@@ -12,25 +12,52 @@ self.addEventListener("activate", (event) => {
 });
 self.addEventListener("fetch", (event) => {
   const request = event.request;
-  // Only intercept image requests
-  if (request.destination === "image") {
+  const url = new URL(request.url);
+  // Only intercept HTTP/HTTPS image requests
+  if (request.destination === "image" && (url.protocol === "http:" || url.protocol === "https:")) {
     event.respondWith(
-      caches.open(CACHE_NAME).then(async (cache) => {
-        const cached = await cache.match(request);
-        if (cached) return cached;
+      (async () => {
+        const clientId = event.clientId;
+        const post = async (status, error) => {
+          if (clientId) {
+            try {
+              const client = await self.clients.get(clientId);
+              client?.postMessage({
+                type: "SW_IMAGE_STATUS",
+                url: request.url,
+                status,
+                error: error ? error.toString() : void 0
+              });
+            } catch (e) {
+              console.error("[SW] Failed to send message to client", e);
+            }
+          }
+        };
         try {
+          const cache = await caches.open(CACHE_NAME);
+          const cached = await cache.match(request);
+          if (cached) {
+            await post("HIT");
+            console.log(`[SW] Return from CACHE_HIT for: ${request.url}`);
+            return cached;
+          }
           const response = await fetch(request);
-          // Only cache successful external/local images
-          // Avoid caching things that are not 200 (like 404s)
-          if (response && response.status === 200) {
-            cache.put(request, response.clone());
+          if (response && (response.status === 200 || response.status === 0)) {
+            await cache.put(request, response.clone());
+            await post("MISS_CACHED");
+            console.log(`[SW] Return from FETCH (and cached) for: ${request.url}`);
+          } else {
+            await post("MISS_NOT_CACHED");
+            console.log(`[SW] Return from FETCH (bypassed cache) for: ${request.url}`);
           }
           return response;
         } catch (error) {
-          // Fallback or just return error
-          return fetch(request);
+          await post("ERROR_FALLBACK", error);
+          const fallbackResponse = await fetch(request);
+          console.log(`[SW] Return from FALLBACK_FETCH (Error: ${error}) for: ${request.url}`);
+          return fallbackResponse;
         }
-      })
+      })()
     );
   }
 });
