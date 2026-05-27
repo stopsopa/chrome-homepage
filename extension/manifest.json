@@ -6,6 +6,9 @@
   "chrome_url_overrides": {
     "newtab": "homepage.html"
   },
+  "background": {
+    "service_worker": "sw.js"
+  },
   "permissions": ["bookmarks", "tabs", "scripting"],
   "host_permissions": [
     "https://gemini.google.com/*",
