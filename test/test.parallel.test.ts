@@ -1,7 +1,6 @@
 import { it, determineMode } from "./utils.ts";
 import assert from "node:assert/strict";
 
-
 determineMode(import.meta.url);
 
 /**

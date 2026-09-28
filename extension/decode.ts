@@ -1,4 +1,3 @@
-
 import LZString from "lz-string";
 import type { Bookmark, BookmarkStored } from "./types.js";
 

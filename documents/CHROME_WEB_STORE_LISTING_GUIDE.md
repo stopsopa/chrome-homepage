@@ -119,21 +119,25 @@ A premium new tab dashboard that combines visual bookmark management with a unif
 #### **Permission Justifications**
 
 **bookmarks**
+
 ```
 Required to store and retrieve your dashboard links and AI skills locally in a specialized folder, ensuring your data is always accessible and private.
 ```
 
 **tabs**
+
 ```
 Required to open multiple search engines simultaneously in new tabs when performing a multi-select search.
 ```
 
 **scripting**
+
 ```
 Used to enhance interactions with specific AI search tools for a seamless transition from the dashboard.
 ```
 
 **host permissions** (`gemini.google.com`, `chatgpt.com`, `claude.ai`, `t3.chat`)
+
 ```
 Required to facilitate a seamless search experience across these AI platforms. These permissions allow the extension to ensure that search queries and prepended "Skills" are correctly handled when opened via the unified dashboard interface. Access is strictly limited to these specific domains.
 ```

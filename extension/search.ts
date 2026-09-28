@@ -58,7 +58,7 @@ export default {
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       if (shouldStop()) return;
-      
+
       log(`chatgpt.act(): >${url}< after wait`);
 
       try {

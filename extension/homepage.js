@@ -21,7 +21,12 @@ if ("serviceWorker" in navigator) {
       } else if (status === "MISS_NOT_CACHED") {
         console.log(`%c[SW BYPASS NO-CACHE] %c${url}`, "color: #f59e0b; font-weight: bold;", "color: inherit;");
       } else if (status === "ERROR_FALLBACK") {
-        console.log(`%c[SW ERROR FALLBACK] %c${url} %c(Error: ${error || "Unknown"})`, "color: #ef4444; font-weight: bold;", "color: inherit;", "color: #ef4444; font-style: italic;");
+        console.log(
+          `%c[SW ERROR FALLBACK] %c${url} %c(Error: ${error || "Unknown"})`,
+          "color: #ef4444; font-weight: bold;",
+          "color: inherit;",
+          "color: #ef4444; font-style: italic;"
+        );
       }
     }
   });
@@ -318,55 +323,131 @@ function updateBackgroundColorFromImage(url) {
   img.src = url;
 }
 /**
- * Generates a fresh seeded picsum URL and follows HTTP redirect to obtain the
- * final static image URL (e.g. fastly.picsum.photos/id/...).
- * Using a seed and storing the resolved URL ensures the image remains identical across reloads.
+ * Opens or initializes the IndexedDB database for wallpaper caching.
+ */
+function openWallpaperDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open("wallpaper-cache", 1);
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains("images")) {
+        db.createObjectStore("images", { keyPath: "key" });
+      }
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+/**
+ * Stores a wallpaper record with Blob directly in IndexedDB.
+ */
+async function cacheWallpaperImage(image) {
+  const db = await openWallpaperDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction("images", "readwrite");
+    tx.objectStore("images").put(image);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+/**
+ * Retrieves a cached wallpaper record from IndexedDB by key.
+ */
+async function getCachedWallpaperImage(key = "current") {
+  try {
+    const db = await openWallpaperDB();
+    return await new Promise((resolve, reject) => {
+      const tx = db.transaction("images", "readonly");
+      const request = tx.objectStore("images").get(key);
+      request.onsuccess = () => resolve(request.result || null);
+      request.onerror = () => reject(request.error);
+    });
+  } catch (e) {
+    console.warn("[Wallpaper] IndexedDB read failed:", e);
+    return null;
+  }
+}
+/**
+ * Fetches a fresh seeded picsum URL and stores the image Blob directly in IndexedDB.
+ * Returns { url, blob } on success, or null if offline/fetch fails.
  */
 async function getFreshImage() {
   const seed = Date.now().toString(36) + Math.random().toString(36).substring(2, 7);
   const seededUrl = `https://picsum.photos/seed/${seed}/1920/1080`;
   try {
     const response = await fetch(seededUrl);
-    if (response.ok && response.url) {
-      console.log("[Wallpaper] Resolved final static image URL:", response.url);
-      return response.url;
+    if (response.ok) {
+      const blob = await response.blob();
+      const finalUrl = response.url || seededUrl;
+      await cacheWallpaperImage({
+        key: "current",
+        url: finalUrl,
+        blob,
+        timestamp: Date.now()
+      });
+      console.log("[Wallpaper] Cached Blob in IndexedDB:", finalUrl);
+      return { url: finalUrl, blob };
     }
   } catch (e) {
-    console.warn("[Wallpaper] Fetch failed, fallback to seeded URL:", e);
+    console.warn("[Wallpaper] Fetch failed (offline or network error):", e);
   }
-  return seededUrl;
+  return null;
 }
-function applyWallpaperUrl(url) {
+/**
+ * Applies the wallpaper Blob to the DOM using URL.createObjectURL,
+ * extracts dominant background color, and updates timestamp/date metadata in localStorage.
+ */
+function applyWallpaper(fresh) {
   const now = /* @__PURE__ */ new Date();
-  console.log("[Wallpaper] Applying:", url, "at", now.toISOString());
-  wallpaperEl.style.backgroundImage = `url("${url}")`;
-  localStorage.setItem("wallpaper_url", url);
+  const objectUrl = URL.createObjectURL(fresh.blob);
+  console.log("[Wallpaper] Applying new wallpaper at", now.toISOString());
+  wallpaperEl.style.backgroundImage = `url("${objectUrl}")`;
+  localStorage.setItem("wallpaper_url", fresh.url);
   localStorage.setItem("wallpaper_time", now.getTime().toString());
   localStorage.setItem("wallpaper_date", todayString(now));
-  updateBackgroundColorFromImage(url);
+  localStorage.removeItem("wallpaper_data_url");
+  updateBackgroundColorFromImage(objectUrl);
 }
 async function initWallpaper() {
-  const cachedUrl = localStorage.getItem("wallpaper_url");
-  const cachedTime = localStorage.getItem("wallpaper_time");
+  const cachedRecord = await getCachedWallpaperImage("current");
+  const cachedTime = cachedRecord ? cachedRecord.timestamp.toString() : localStorage.getItem("wallpaper_time");
   const cachedDate = localStorage.getItem("wallpaper_date");
   const sameDay = isSameDay(cachedTime, cachedDate);
-  const isCleanCachedUrl = Boolean(cachedUrl && !cachedUrl.includes("?random="));
-  console.log("[Wallpaper] Stored date:", cachedDate, "stored time:", cachedTime, "today:", todayString(), "sameDay:", sameDay, "isClean:", isCleanCachedUrl);
-  if (isCleanCachedUrl && sameDay) {
-    // Same day — reuse cached URL, no network request needed
-    console.log("[Wallpaper] Reusing cached URL for today:", cachedUrl);
-    wallpaperEl.style.backgroundImage = `url("${cachedUrl}")`;
+  console.log(
+    "[Wallpaper] Stored date:",
+    cachedDate,
+    "stored time:",
+    cachedTime,
+    "today:",
+    todayString(),
+    "sameDay:",
+    sameDay,
+    "hasBlob:",
+    Boolean(cachedRecord)
+  );
+  if (cachedRecord && cachedRecord.blob) {
+    const objectUrl = URL.createObjectURL(cachedRecord.blob);
+    wallpaperEl.style.backgroundImage = `url("${objectUrl}")`;
     const cachedBgColor = localStorage.getItem("wallpaper_bg_color");
     if (cachedBgColor) {
       document.documentElement.style.setProperty("--backgroundColor", cachedBgColor);
     }
-    updateBackgroundColorFromImage(cachedUrl);
+    updateBackgroundColorFromImage(objectUrl);
+    if (sameDay) {
+      console.log("[Wallpaper] Reusing cached wallpaper from IndexedDB for today");
+      return;
+    }
+  }
+  // New day (or first run) — attempt to fetch fresh image
+  console.log("[Wallpaper] New day or fresh image needed — attempting fetch");
+  const fresh = await getFreshImage();
+  if (fresh) {
+    applyWallpaper(fresh);
     return;
   }
-  // New day (or first run) — fetch a fresh image
-  console.log("[Wallpaper] New day or first run — fetching fresh image");
-  const freshUrl = await getFreshImage();
-  applyWallpaperUrl(freshUrl);
+  // Fetch failed (offline or network error) — keep existing cached background intact,
+  // do not update date/time in cache so next reload will try again.
+  console.log("[Wallpaper] Fetch failed or offline — retaining existing cached background");
 }
 function loadWallpaperSettings() {
   const brightness = localStorage.getItem("wp_brightness");
@@ -441,8 +522,10 @@ wpDialog.addEventListener("click", (e) => {
 });
 wpReloadBtn.addEventListener("click", async () => {
   console.log("[Wallpaper] Manual reload triggered");
-  const freshUrl = await getFreshImage();
-  applyWallpaperUrl(freshUrl);
+  const fresh = await getFreshImage();
+  if (fresh) {
+    applyWallpaper(fresh);
+  }
 });
 // Restore persisted filter/animation settings into form controls
 loadWallpaperSettings();

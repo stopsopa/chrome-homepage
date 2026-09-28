@@ -7,7 +7,6 @@ When it comes to layout, keep it as raw html as possible. Don't do any not reque
 When it comes to layout, keep it as raw html as possible. Don't do any not requested styling.
 Do only what requested.
 
-
 First of all always assume I have transpiler running against any *.ts file in extension directory
 
 so every *.ts file is transpiled to *.js there.
@@ -24,14 +23,11 @@ when you need transpile run
 
 or just ask for it - I would prefer if you ask for it
 
-
 also be aware that there is extension/modules.js
 
 which is always built from extension/modules.ts
 
 this is module wich is meant to combine all modules (bundle them) to deliver in one go to the browser context - so register there all modules you add
-
-
 
 I would like to redesign this plugin:
 
@@ -55,7 +51,7 @@ The idea is to store our states in the bookmarks.
 we will reserve folder by name "_" in the bookmarks bar.
 
 In bookmarks we can only store folders and links and folders have only name
-and bookmarks have two fields 'name' and 'url'. 
+and bookmarks have two fields 'name' and 'url'.
 
 Also what I've discovered is that name can be empty string '',
 But url cannot be empty string ''.
@@ -88,26 +84,24 @@ then we will load sandbox.html
 
 In sandbox let's create simple list (like classic todo list) - keep html raw.
 
-That list will allow us to define list of bookmarks in the "_" directory 
+That list will allow us to define list of bookmarks in the "_" directory
 
 (create "_" directory if doesn't exist)
 
-and we can click "+" button next to the list and then on the right form will open where we have to define 'type' and optionally url, and ui will allow us to add any number of extra fields 'key' 'value' 
+and we can click "+" button next to the list and then on the right form will open where we have to define 'type' and optionally url, and ui will allow us to add any number of extra fields 'key' 'value'
 and we will collect all of that and store in bookmark in "_"
 
 and when we go back to sandbox.html each bookmakr shold load on the list and on the right for each element on the list should be delete and edit button.
 
 delete should show confirmation - use native confirm() primitive to guard this.
 
-'edit" button should deserialise given bookmark and populate form for edit. 
+'edit" button should deserialise given bookmark and populate form for edit.
 
 pressing 'save' shold replace that bookmark with edited data.
 
 if possible also save it on the same place (order wise)
 
 keep all simple, also make it also simple as possible regarding how it will communicate with browser under the hood.
-
-
 
 # homepage.html
 
@@ -116,6 +110,7 @@ The plugin renders a grid of bookmark icons on the new tab page.
 In the top right corner there is an "Edit" button (toggle).
 
 When edit mode is active:
+
 - an "Add Link" button appears
 - clicking it opens a popup form accepting 'title', 'url', and 'logo' (logo URL)
 - submitting places the bookmark on the grid

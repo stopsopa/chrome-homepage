@@ -191,7 +191,7 @@ function updateGitignoreFile(
   gitRoot: string,
   startMarker: string,
   endMarker: string,
-  gitignorePaths: string[]
+  gitignorePaths: string[],
 ): string[] {
   const gitignorePath = join(gitRoot, ".gitignore");
   if (!existsSync(gitignorePath)) {
@@ -208,8 +208,8 @@ function updateGitignoreFile(
     if (endIndex === -1) missing.push(`'${endMarker}'`);
     throw th(
       `.gitignore is missing markers: ${missing.join(
-        " and "
-      )} HELP: run first time without --update parameter, take the output and put into .gitignore and then run again with --update`
+        " and ",
+      )} HELP: run first time without --update parameter, take the output and put into .gitignore and then run again with --update`,
     );
   }
 

@@ -15,7 +15,7 @@ it("should serialize and decode a bookmark with a normal URL", () => {
     type: "link",
     url: "https://example.com",
     title: "Example",
-    extra: "data"
+    extra: "data",
   };
 
   const serialized = serialize(bookmark);
@@ -25,7 +25,7 @@ it("should serialize and decode a bookmark with a normal URL", () => {
   assert.strictEqual(serialized.url, "https://example.com");
 
   const decoded = decode(serialized);
-  
+
   assert.deepStrictEqual(decoded, bookmark);
 });
 
@@ -33,16 +33,16 @@ it("should serialize and decode a bookmark without a URL (fallback to chrome://n
   const bookmark: Bookmark = {
     type: "folder",
     title: "My Folder",
-    color: "blue"
+    color: "blue",
   };
 
   const serialized = serialize(bookmark);
-  
+
   assert.ok(serialized.name.startsWith("folder:"), "Name should start with type followed by colon");
   assert.strictEqual(serialized.url, "chrome://new-tab-page");
 
   const decoded = decode(serialized);
-  
+
   // The decoded bookmark should NOT have the url property if it was chrome://new-tab-page
   assert.deepStrictEqual(decoded, bookmark);
   assert.strictEqual((decoded as any).url, undefined);
@@ -53,26 +53,26 @@ it("should handle bookmark with chrome://new-tab-page explicitly", () => {
     type: "special",
     title: "",
     url: "chrome://new-tab-page",
-    description: "Home"
+    description: "Home",
   };
 
   const serialized = serialize(bookmark);
   assert.strictEqual(serialized.url, "chrome://new-tab-page");
 
   const decoded = decode(serialized);
-  
+
   // Requirement says: when url is 'chrome://new-tab-page' then we should generate variant without url
   const expected: Bookmark = {
     type: "special",
     title: "",
-    description: "Home"
+    description: "Home",
   };
   assert.deepStrictEqual(decoded, expected);
 });
 
 it("should throw error if type is missing", () => {
   const bookmark = {
-    url: "https://example.com"
+    url: "https://example.com",
   } as any;
 
   assert.throws(() => {

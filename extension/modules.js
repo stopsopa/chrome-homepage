@@ -494,7 +494,10 @@ var __copyProps2 = (to, from, except, desc) => {
   if (from && typeof from === "object" || typeof from === "function") {
     for (let key of __getOwnPropNames2(from))
       if (!__hasOwnProp2.call(to, key) && key !== except)
-        __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
+        __defProp2(to, key, {
+          get: () => from[key],
+          enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable
+        });
   }
   return to;
 };

@@ -27,7 +27,14 @@
     <header id="header-panel" class="gcp-css hidden">
       <div class="header-actions">
         <!-- Open wallpaper settings modal -->
-        <button id="wallpaper-settings-open" data-testid="wallpaper-settings-open" tabindex="-1" title="Wallpaper settings">&#9881;</button>
+        <button
+          id="wallpaper-settings-open"
+          data-testid="wallpaper-settings-open"
+          tabindex="-1"
+          title="Wallpaper settings"
+        >
+          &#9881;
+        </button>
 
         <button id="add-bookmark" class="hidden" tabindex="-1">Add Link</button>
         <button id="edit-toggle" tabindex="-1">Edit</button>
@@ -72,7 +79,13 @@
         <div class="wp-control">
           <div class="wp-control-header">
             <div class="wp-control-left">
-              <input id="brightnessEnabled" class="wp-control-checkbox" type="checkbox" data-testid="brightness-enabled" checked />
+              <input
+                id="brightnessEnabled"
+                class="wp-control-checkbox"
+                type="checkbox"
+                data-testid="brightness-enabled"
+                checked
+              />
               <label class="wp-control-label" for="brightnessEnabled">Brightness</label>
             </div>
             <span id="brightnessValue" class="wp-control-value">98%</span>
@@ -83,7 +96,13 @@
         <div class="wp-control">
           <div class="wp-control-header">
             <div class="wp-control-left">
-              <input id="saturationEnabled" class="wp-control-checkbox" type="checkbox" data-testid="saturation-enabled" checked />
+              <input
+                id="saturationEnabled"
+                class="wp-control-checkbox"
+                type="checkbox"
+                data-testid="saturation-enabled"
+                checked
+              />
               <label class="wp-control-label" for="saturationEnabled">Saturation</label>
             </div>
             <span id="saturationValue" class="wp-control-value">148%</span>
@@ -94,7 +113,13 @@
         <div class="wp-control">
           <div class="wp-control-header">
             <div class="wp-control-left">
-              <input id="contrastEnabled" class="wp-control-checkbox" type="checkbox" data-testid="contrast-enabled" checked />
+              <input
+                id="contrastEnabled"
+                class="wp-control-checkbox"
+                type="checkbox"
+                data-testid="contrast-enabled"
+                checked
+              />
               <label class="wp-control-label" for="contrastEnabled">Contrast</label>
             </div>
             <span id="contrastValue" class="wp-control-value">71%</span>
@@ -114,11 +139,21 @@
             <span class="wp-control-label">Animation speed</span>
             <span id="animationSpeedValue" class="wp-control-value">30s</span>
           </div>
-          <input id="animationSpeed" type="range" min="5" max="120" step="5" value="30" data-testid="animation-speed-range" />
+          <input
+            id="animationSpeed"
+            type="range"
+            min="5"
+            max="120"
+            step="5"
+            value="30"
+            data-testid="animation-speed-range"
+          />
         </div>
 
         <div class="wp-dialog-footer">
-          <button type="button" id="wallpaper-dialog-close" data-testid="wallpaper-dialog-close" class="btn-secondary">Close</button>
+          <button type="button" id="wallpaper-dialog-close" data-testid="wallpaper-dialog-close" class="btn-secondary">
+            Close
+          </button>
         </div>
       </div>
     </dialog>
