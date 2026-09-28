@@ -7,57 +7,47 @@
 #### **Extension Name**
 
 ```
-Custom New Tab Dashboard & AI Search
+Custom New Tab Dashboard
 ```
 
 #### **Summary** (132 characters max)
 
 ```
-A premium, minimal dashboard for your new tab. Organize links, manage AI skills, and search multiple engines simultaneously.
+A clean, minimal new tab dashboard to organize bookmarks with drag-and-drop and enjoy customizable dynamic daily wallpapers.
 ```
 
 #### **Description** (16,000 characters max)
 
 ```
-Custom New Tab Dashboard is a high-performance, private start page that centralizes your digital workflow. Replace the generic new tab with a sleek, customizable interface designed for speed and productivity.
+Custom New Tab Dashboard is a high-performance, private start page that centralizes your digital workflow. Replace the generic new tab with a sleek, customizable interface designed for speed and simplicity.
 
 ## Key Features
 
-🚀 **Unified AI Search**
-- Search multiple AI tools (ChatGPT, Claude, Gemini) and traditional engines simultaneously.
-- Use Command/Cmd + Enter to open all selected tools in separate tabs instantly.
-- Toggle between search engines with ease using a keyboard-first interface.
-
-🧠 **AI Skills Management**
-- Create and manage "AI Skills" — custom system prompts that provide context to your queries.
-- Multi-select skills to combine context and prepend them automatically to your AI searches.
-- Fine-grained control: skills are only injected into AI-capable tools, keeping standard searches clean.
-
 🔗 **Visual Bookmark Grid**
 - Organize your favorite links on a customizable grid.
-- Drag-and-drop reordering with a snap-to-grid system for a perfect layout.
-- Edit titles, URLs, and logos for a personalized visual experience.
+- Drag-and-drop reordering with a snap-to-grid system for a neat layout.
+- Edit titles, URLs, and custom logos for a personalized visual experience.
 
-⌨️ **Keyboard-Centric Navigation**
-- Optimized for power users with full keyboard support (Tab, Arrows, Cmd+Enter).
-- Section-based navigation ensures you can move between search, tools, and skills without a mouse.
-- Quick-clear search button for a fresh start.
+🖼️ **Dynamic Daily Wallpapers**
+- Enjoy beautiful, daily-refreshed wallpaper backgrounds.
+- Built-in wallpaper controls to adjust brightness, saturation, and contrast.
+- Optional subtle wallpaper animation with customizable speed.
+- On-demand reload button to fetch a new background anytime.
+- Smart offline caching using IndexedDB to keep page loads instant.
 
 🔒 **Privacy & Data Control**
-- All data is stored locally in your browser's bookmarks and localStorage.
-- Your "AI Skills" and layout settings stay on your machine.
-- No external trackers, no accounts required, and no data collection.
+- All bookmark data is stored directly in your browser's native bookmarks.
+- Layout settings and wallpaper preferences stay strictly on your local machine.
+- No external trackers, no accounts required, and no user data collection.
 
 ## How It Works
 
 1. **New Tab Experience**: Every new tab opens your custom dashboard.
-2. **Organize**: Enter "Edit Mode" to drag bookmarks or add new links and AI skills.
-3. **Search**: Type your query, select your preferred engines/skills, and hit Enter.
-4. **Skills**: Select one or more "Skills" (like "Code Expert" or "Creative Writer") to automatically enhance your AI prompts.
+2. **Organize**: Enter "Edit Mode" to drag bookmarks, adjust positions, edit details, or add new links.
+3. **Customize Wallpaper**: Open the settings panel to tune visual filters and animation settings to your liking.
 
 ## Perfect For
 
-- Developers and researchers who frequently switch between multiple AI models.
 - Power users who want a clean, aesthetic, and functional start page.
 - Anyone valuing privacy and local data ownership over cloud-synced extensions.
 ```
@@ -84,9 +74,9 @@ Create and use: `extension/images/icon128.png`
 
 Suggested screenshots to create:
 
-1. **Main Dashboard**: Show the sleek search bar, engines, and the bookmark grid.
-2. **AI Skills Manager**: Show the side-by-side skill editor with prompt content.
-3. **Multi-Select Search**: Demonstrate selecting multiple AI tools for a single query.
+1. **Main Dashboard**: Show the clean bookmark grid over a scenic dynamic wallpaper background.
+2. **Edit Mode**: Show bookmark organization, drag-and-drop positioning, and the add/edit bookmark modal.
+3. **Wallpaper Settings**: Show the wallpaper adjustment panel with brightness, contrast, saturation, and animation controls.
 
 ### Additional Information
 
@@ -105,7 +95,7 @@ https://github.com/stopsopa/chrome-homepage/issues
 #### **Version**
 
 ```
-0.1
+0.2
 ```
 
 ### Privacy & Permissions
@@ -113,7 +103,7 @@ https://github.com/stopsopa/chrome-homepage/issues
 #### **Single Purpose Description**
 
 ```
-A premium new tab dashboard that combines visual bookmark management with a unified AI search interface and local prompt management.
+A clean, private new tab dashboard for organizing bookmarks on a visual grid with customizable daily dynamic wallpapers.
 ```
 
 #### **Permission Justifications**
@@ -121,25 +111,13 @@ A premium new tab dashboard that combines visual bookmark management with a unif
 **bookmarks**
 
 ```
-Required to store and retrieve your dashboard links and AI skills locally in a specialized folder, ensuring your data is always accessible and private.
+Required to store and retrieve your dashboard links locally in a dedicated bookmark folder, ensuring your data remains private and synchronized with your browser bookmarks.
 ```
 
-**tabs**
+**host permissions** (`https://picsum.photos/*`, `https://fastly.picsum.photos/*`)
 
 ```
-Required to open multiple search engines simultaneously in new tabs when performing a multi-select search.
-```
-
-**scripting**
-
-```
-Used to enhance interactions with specific AI search tools for a seamless transition from the dashboard.
-```
-
-**host permissions** (`gemini.google.com`, `chatgpt.com`, `claude.ai`, `t3.chat`)
-
-```
-Required to facilitate a seamless search experience across these AI platforms. These permissions allow the extension to ensure that search queries and prepended "Skills" are correctly handled when opened via the unified dashboard interface. Access is strictly limited to these specific domains.
+Required to fetch dynamic daily wallpaper images for the dashboard background.
 ```
 
 #### **Data Usage**
@@ -147,7 +125,7 @@ Required to facilitate a seamless search experience across these AI platforms. T
 **What data does your extension collect?**
 
 ```
-No user data is collected or transmitted. All configurations (links, skills, search history) are stored entirely within your browser's local storage and bookmarks.
+No user data is collected or transmitted. All configurations (links, layout, and wallpaper settings) are stored entirely within your browser's local storage, IndexedDB, and bookmarks.
 ```
 
 **How is user data used?**
@@ -183,3 +161,4 @@ Free
 ```
 Chrome Web Store only
 ```
+
