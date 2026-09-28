@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wallpaper Filter Tester</title>
+
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        font-family:
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          sans-serif;
+      }
+
+      /*
+     * ============================================================
+     * WALLPAPER
+     * ============================================================
+     */
+
+      #wallpaper {
+        position: fixed;
+        inset: -3%;
+        width: 106%;
+        height: 106%;
+
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+
+        /*
+       * The three filters are controlled by JavaScript.
+       */
+        filter: brightness(98%) saturate(148%) contrast(71%);
+
+        /*
+       * ==========================================================
+       * WALLPAPER ANIMATION
+       *
+       * --wallpaper-animation-duration controls SPEED only.
+       *
+       * The zoom amount is fixed at 6%.
+       *
+       * One complete animation cycle is:
+       *
+       *   0%   -> normal size
+       *   50%  -> 6% zoom
+       *   100% -> normal size
+       *
+       * The animation repeats forever.
+       * ==========================================================
+       */
+
+        --wallpaper-animation-duration: 30s;
+
+        animation-name: wallpaper-zoom;
+        animation-duration: var(--wallpaper-animation-duration);
+        animation-timing-function: ease-in-out;
+        animation-iteration-count: infinite;
+        animation-play-state: running;
+      }
+
+      @keyframes wallpaper-zoom {
+        0% {
+          transform: scale(1);
+        }
+
+        50% {
+          transform: scale(1.06);
+        }
+
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      /*
+     * ============================================================
+     * END OF WALLPAPER ANIMATION
+     * ============================================================
+     */
+
+      main {
+        position: relative;
+        z-index: 1;
+
+        width: 100%;
+        height: 100%;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .panel {
+        width: 440px;
+        padding: 24px;
+
+        border-radius: 16px;
+
+        background: rgba(0, 0, 0, 0.45);
+        color: white;
+      }
+
+      h1 {
+        margin: 0 0 20px;
+
+        font-size: 20px;
+        font-weight: 600;
+      }
+
+      .icons {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+
+        margin-bottom: 24px;
+      }
+
+      .icon {
+        aspect-ratio: 1;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.15);
+
+        font-size: 24px;
+      }
+
+      .control {
+        margin-top: 16px;
+      }
+
+      .control-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        margin-bottom: 6px;
+      }
+
+      .control-left {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .control-label {
+        font-size: 14px;
+      }
+
+      .control-value {
+        font-size: 13px;
+        opacity: 0.7;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .control-checkbox {
+        margin: 0;
+      }
+
+      input[type="range"] {
+        display: block;
+        width: 100%;
+      }
+
+      /*
+     * ============================================================
+     * ANIMATION CONTROLS
+     * ============================================================
+     */
+
+      .animation-control {
+        margin-top: 24px;
+        padding-top: 18px;
+
+        border-top: 1px solid rgba(255, 255, 255, 0.15);
+      }
+
+      .animation-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        margin-bottom: 12px;
+
+        font-size: 14px;
+      }
+
+      .animation-checkbox input {
+        margin: 0;
+      }
+
+      button {
+        width: 100%;
+
+        margin-top: 20px;
+        padding: 10px 14px;
+
+        border: 0;
+        border-radius: 8px;
+
+        background: rgba(255, 255, 255, 0.9);
+        color: #111;
+
+        font: inherit;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background: white;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="wallpaper"></div>
+
+    <main>
+      <div class="panel">
+        <h1>Wallpaper Filter Tester</h1>
+
+        <div class="icons">
+          <div class="icon">🌄</div>
+          <div class="icon">🌲</div>
+          <div class="icon">🏔️</div>
+          <div class="icon">🌊</div>
+          <div class="icon">🌅</div>
+          <div class="icon">🌌</div>
+          <div class="icon">🌴</div>
+          <div class="icon">🏕️</div>
+        </div>
+
+        <!-- ======================================================
+           FILTER CONTROLS
+           ====================================================== -->
+
+        <div class="control">
+          <div class="control-header">
+            <div class="control-left">
+              <input id="brightnessEnabled" class="control-checkbox" type="checkbox" checked />
+
+              <label class="control-label" for="brightnessEnabled"> Brightness </label>
+            </div>
+
+            <span id="brightnessValue" class="control-value"> 98% </span>
+          </div>
+
+          <input id="brightness" type="range" min="0" max="200" value="98" />
+        </div>
+
+        <div class="control">
+          <div class="control-header">
+            <div class="control-left">
+              <input id="saturationEnabled" class="control-checkbox" type="checkbox" checked />
+
+              <label class="control-label" for="saturationEnabled"> Saturation </label>
+            </div>
+
+            <span id="saturationValue" class="control-value"> 148% </span>
+          </div>
+
+          <input id="saturation" type="range" min="0" max="200" value="148" />
+        </div>
+
+        <div class="control">
+          <div class="control-header">
+            <div class="control-left">
+              <input id="contrastEnabled" class="control-checkbox" type="checkbox" checked />
+
+              <label class="control-label" for="contrastEnabled"> Contrast </label>
+            </div>
+
+            <span id="contrastValue" class="control-value"> 71% </span>
+          </div>
+
+          <input id="contrast" type="range" min="0" max="200" value="71" />
+        </div>
+
+        <!-- ======================================================
+           ANIMATION CONTROLS
+           ====================================================== -->
+
+        <div class="animation-control">
+          <label class="animation-checkbox" for="animationEnabled">
+            <input id="animationEnabled" type="checkbox" checked />
+
+            <span>Enable wallpaper animation</span>
+          </label>
+
+          <div class="control-header">
+            <span class="control-label"> Animation speed </span>
+
+            <span id="animationSpeedValue" class="control-value"> 30s </span>
+          </div>
+
+          <input id="animationSpeed" type="range" min="5" max="120" step="5" value="30" />
+        </div>
+
+        <button id="reload">Reload wallpaper</button>
+      </div>
+    </main>
+
+    <script>
+      const wallpaper = document.getElementById("wallpaper");
+
+      /*
+       * ============================================================
+       * FILTER CONTROLS
+       * ============================================================
+       */
+
+      const brightness = document.getElementById("brightness");
+
+      const saturation = document.getElementById("saturation");
+
+      const contrast = document.getElementById("contrast");
+
+      const brightnessEnabled = document.getElementById("brightnessEnabled");
+
+      const saturationEnabled = document.getElementById("saturationEnabled");
+
+      const contrastEnabled = document.getElementById("contrastEnabled");
+
+      const brightnessValue = document.getElementById("brightnessValue");
+
+      const saturationValue = document.getElementById("saturationValue");
+
+      const contrastValue = document.getElementById("contrastValue");
+
+      /*
+       * ============================================================
+       * ANIMATION CONTROLS
+       * ============================================================
+       */
+
+      const animationEnabled = document.getElementById("animationEnabled");
+
+      const animationSpeed = document.getElementById("animationSpeed");
+
+      const animationSpeedValue = document.getElementById("animationSpeedValue");
+
+      /*
+       * ============================================================
+       * WALLPAPER
+       * ============================================================
+       */
+
+      const reloadButton = document.getElementById("reload");
+
+      function getFreshImage() {
+        return `https://picsum.photos/1920/1080?random=${Date.now()}`;
+      }
+
+      function getFreshWallpaper() {
+        wallpaper.style.backgroundImage = `url("${getFreshImage()}")`;
+      }
+
+      /*
+       * ============================================================
+       * FILTERS
+       * ============================================================
+       */
+
+      function updateFilters() {
+        const filters = [];
+
+        if (brightnessEnabled.checked) {
+          filters.push(`brightness(${brightness.value}%)`);
+        }
+
+        if (saturationEnabled.checked) {
+          filters.push(`saturate(${saturation.value}%)`);
+        }
+
+        if (contrastEnabled.checked) {
+          filters.push(`contrast(${contrast.value}%)`);
+        }
+
+        wallpaper.style.filter = filters.join(" ");
+
+        brightnessValue.textContent = `${brightness.value}%`;
+
+        saturationValue.textContent = `${saturation.value}%`;
+
+        contrastValue.textContent = `${contrast.value}%`;
+      }
+
+      /*
+       * ============================================================
+       * ANIMATION
+       * ============================================================
+       *
+       * The slider controls the duration of one COMPLETE cycle.
+       *
+       * Example:
+       *
+       *   10s = zoom in + zoom out every 10 seconds
+       *   30s = zoom in + zoom out every 30 seconds
+       *   60s = zoom in + zoom out every 60 seconds
+       *
+       * The zoom amount is always 6%.
+       */
+
+      function updateAnimation() {
+        const duration = `${animationSpeed.value}s`;
+
+        animationSpeedValue.textContent = duration;
+
+        wallpaper.style.animationDuration = duration;
+
+        wallpaper.style.animationPlayState = animationEnabled.checked ? "running" : "paused";
+      }
+
+      /*
+       * ============================================================
+       * EVENTS
+       * ============================================================
+       */
+
+      brightness.addEventListener("input", updateFilters);
+
+      saturation.addEventListener("input", updateFilters);
+
+      contrast.addEventListener("input", updateFilters);
+
+      brightnessEnabled.addEventListener("change", updateFilters);
+
+      saturationEnabled.addEventListener("change", updateFilters);
+
+      contrastEnabled.addEventListener("change", updateFilters);
+
+      animationEnabled.addEventListener("change", updateAnimation);
+
+      animationSpeed.addEventListener("input", updateAnimation);
+
+      reloadButton.addEventListener("click", getFreshWallpaper);
+
+      /*
+       * ============================================================
+       * INITIAL STATE
+       * ============================================================
+       */
+
+      updateFilters();
+      updateAnimation();
+      getFreshWallpaper();
+    </script>
+  </body>
+</html>

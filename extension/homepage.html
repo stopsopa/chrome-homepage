@@ -7,43 +7,33 @@
     <link rel="stylesheet" href="popover.css" />
   </head>
   <body>
-    <header class="gcp-css">
-      <div class="search-container">
-        <div class="search-hint">
-          press ⌘ + enter to open selected
-          <button id="history-btn" class="skill-btn active" popovertarget="history-popover" tabindex="-1">History</button>
-        </div>
-        <div class="search-wrapper">
-          <div class="textarea-wrapper input-wrapper">
-            <textarea id="search-input" placeholder="Search..." autocomplete="off" rows="1"></textarea>
-            <label for="search-input">Search</label>
-            <button id="search-clear" class="hidden no-gcp" tabindex="-1">&times;</button>
-          </div>
-          <div id="search-engines">
-            <div id="rows">
-              <div id="engines-top" class="engine-row"></div>
-              <div id="engines-bottom-wrapper">
-                <div id="engines-bottom" class="engine-row"></div>
-              </div>
-              <div id="go-row" class="engine-row">
-                <button id="search-go" title="Open selected (⌘ + Enter)">Open</button>
-              </div>
-            </div>
-            <div id="skills-list"></div>
-          </div>
-        </div>
-      </div>
-      <div class="header-actions">
-        <button id="add-skill" class="hidden" tabindex="-1">Skills</button>
-        <button id="add-bookmark" class="hidden" tabindex="-1">Add Link</button>
-        <button id="clear-cache" class="hidden" tabindex="-1">Clear Cache</button>
-        <button id="edit-toggle" tabindex="-1">Edit</button>
-      </div>
-    </header>
+    <!-- Fixed wallpaper layer, sits behind everything -->
+    <div id="wallpaper"></div>
 
+    <!-- Grid takes full page -->
     <main id="grid-container">
       <!-- Bookmarks will be rendered here -->
     </main>
+
+    <!-- Always-visible top-right controls: burger + wallpaper reload -->
+    <div id="header-toggle-area">
+      <!-- Reload wallpaper — always visible next to burger -->
+      <button id="wallpaper-reload" data-testid="wallpaper-reload" title="Reload wallpaper">&#8635;</button>
+
+      <button id="header-toggle" data-testid="header-toggle" title="Show controls">&#9776;</button>
+    </div>
+
+    <!-- Floating header panel, top-right, hidden by default -->
+    <header id="header-panel" class="gcp-css hidden">
+      <div class="header-actions">
+        <!-- Open wallpaper settings modal -->
+        <button id="wallpaper-settings-open" data-testid="wallpaper-settings-open" tabindex="-1" title="Wallpaper settings">&#9881;</button>
+
+        <button id="add-bookmark" class="hidden" tabindex="-1">Add Link</button>
+        <button id="edit-toggle" tabindex="-1">Edit</button>
+        <button id="header-hide" tabindex="-1" title="Hide controls">&times;</button>
+      </div>
+    </header>
 
     <!-- Bookmark Dialog -->
     <dialog id="bookmark-dialog" class="gcp-css">
@@ -68,48 +58,70 @@
       </form>
     </dialog>
 
-    <!-- Skills Management Dialog -->
-    <dialog id="skills-dialog" class="fullscreen-dialog gcp-css">
-      <div class="skills-manager">
-        <aside class="skills-sidebar">
-          <div class="sidebar-header">
-            <h3>Skills</h3>
-            <button id="new-skill-btn" class="btn-success">Add New</button>
-          </div>
-          <div id="skills-manager-list"></div>
-          <div class="sidebar-footer">
-            <button id="close-skills-btn" class="btn-secondary">Close</button>
-          </div>
-        </aside>
-        <section class="skills-editor">
-          <form id="skill-form">
-            <div class="field input-wrapper">
-              <input type="text" name="title" id="skill-title" required placeholder=" " />
-              <label for="skill-title">Skill Title</label>
+    <!-- ============================================================
+         WALLPAPER SETTINGS DIALOG
+         Contains all filter sliders + checkboxes + animation controls.
+         State is persisted to localStorage.
+         ============================================================ -->
+    <dialog id="wallpaper-dialog" data-testid="wallpaper-dialog">
+      <div class="wp-panel">
+        <h2 class="wp-title">Wallpaper Settings</h2>
+
+        <!-- FILTER CONTROLS -->
+
+        <div class="wp-control">
+          <div class="wp-control-header">
+            <div class="wp-control-left">
+              <input id="brightnessEnabled" class="wp-control-checkbox" type="checkbox" data-testid="brightness-enabled" checked />
+              <label class="wp-control-label" for="brightnessEnabled">Brightness</label>
             </div>
-            <div class="field skill-content-field input-wrapper">
-              <textarea name="content" id="skill-content" required placeholder=" "></textarea>
-              <label for="skill-content">Prompt Content</label>
+            <span id="brightnessValue" class="wp-control-value">98%</span>
+          </div>
+          <input id="brightness" type="range" min="0" max="200" value="98" data-testid="brightness-range" />
+        </div>
+
+        <div class="wp-control">
+          <div class="wp-control-header">
+            <div class="wp-control-left">
+              <input id="saturationEnabled" class="wp-control-checkbox" type="checkbox" data-testid="saturation-enabled" checked />
+              <label class="wp-control-label" for="saturationEnabled">Saturation</label>
             </div>
-            <footer class="dialog-footer">
-              <button type="submit" class="btn-primary">Save Skill</button>
-            </footer>
-          </form>
-        </section>
+            <span id="saturationValue" class="wp-control-value">148%</span>
+          </div>
+          <input id="saturation" type="range" min="0" max="200" value="148" data-testid="saturation-range" />
+        </div>
+
+        <div class="wp-control">
+          <div class="wp-control-header">
+            <div class="wp-control-left">
+              <input id="contrastEnabled" class="wp-control-checkbox" type="checkbox" data-testid="contrast-enabled" checked />
+              <label class="wp-control-label" for="contrastEnabled">Contrast</label>
+            </div>
+            <span id="contrastValue" class="wp-control-value">71%</span>
+          </div>
+          <input id="contrast" type="range" min="0" max="200" value="71" data-testid="contrast-range" />
+        </div>
+
+        <!-- ANIMATION CONTROLS -->
+
+        <div class="wp-animation-control">
+          <label class="wp-animation-checkbox" for="animationEnabled">
+            <input id="animationEnabled" type="checkbox" data-testid="animation-enabled" checked />
+            <span>Enable wallpaper animation</span>
+          </label>
+
+          <div class="wp-control-header">
+            <span class="wp-control-label">Animation speed</span>
+            <span id="animationSpeedValue" class="wp-control-value">30s</span>
+          </div>
+          <input id="animationSpeed" type="range" min="5" max="120" step="5" value="30" data-testid="animation-speed-range" />
+        </div>
+
+        <div class="wp-dialog-footer">
+          <button type="button" id="wallpaper-dialog-close" data-testid="wallpaper-dialog-close" class="btn-secondary">Close</button>
+        </div>
       </div>
     </dialog>
-
-    <!-- History Popover -->
-    <div id="history-popover" popover data-popover class="bottom-right">
-      <div class="history-content">
-        <div class="history-list-section">
-          <div id="history-list"></div>
-        </div>
-        <div class="history-preview-section">
-          <pre id="history-preview"></pre>
-        </div>
-      </div>
-    </div>
 
     <script type="module" src="homepage.js"></script>
   </body>

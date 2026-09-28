@@ -4,7 +4,6 @@
     extension: ".js"
 }
 @es.ts */import { serialize, decode } from "./modules.js";
-import engines from "./search.js";
 console.log("Homepage script initializing...");
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("./sw.js").then((reg) => {
@@ -27,212 +26,36 @@ if ("serviceWorker" in navigator) {
     }
   });
 }
-const searchInput = document.getElementById("search-input");
-const searchClear = document.getElementById("search-clear");
-const enginesTop = document.getElementById("engines-top");
-const enginesBottom = document.getElementById("engines-bottom");
-const skillsList = document.getElementById("skills-list");
 const editToggle = document.getElementById("edit-toggle");
 const gridContainer = document.getElementById("grid-container");
 const addBtn = document.getElementById("add-bookmark");
-const addSkillBtn = document.getElementById("add-skill");
-const clearCacheBtn = document.getElementById("clear-cache");
 const bookmarkDialog = document.getElementById("bookmark-dialog");
 const bookmarkForm = document.getElementById("bookmark-form");
 const dialogCancel = document.getElementById("dialog-cancel");
-const skillsDialog = document.getElementById("skills-dialog");
-const skillsManagerList = document.getElementById("skills-manager-list");
-const skillForm = document.getElementById("skill-form");
-const newSkillBtn = document.getElementById("new-skill-btn");
-const skillContent = document.getElementById("skill-content");
-const closeSkillsBtn = document.getElementById("close-skills-btn");
-const historyList = document.getElementById("history-list");
-const historyPreview = document.getElementById("history-preview");
-const historyPopover = document.getElementById("history-popover");
-const historyBtn = document.getElementById("history-btn");
+const headerPanel = document.getElementById("header-panel");
+const headerToggle = document.getElementById("header-toggle");
+const headerHide = document.getElementById("header-hide");
 let isEditMode = false;
 let currentFolderId = null;
 let currentEditId = null;
-let currentSkillId = null;
-// Persistence
-let activeSkillIds = new Set(JSON.parse(localStorage.getItem("selected_skills") || "[]"));
-let selectedEngineIds = new Set(JSON.parse(localStorage.getItem("selected_engines") || "[]"));
+headerToggle.addEventListener("click", () => {
+  headerPanel.classList.remove("hidden");
+});
+headerHide.addEventListener("click", () => {
+  headerPanel.classList.add("hidden");
+  // Also exit edit mode when hiding
+  if (isEditMode) {
+    isEditMode = false;
+    document.body.classList.remove("edit-mode");
+    editToggle.classList.remove("active");
+    addBtn.classList.add("hidden");
+  }
+});
 let dragElement = null;
 let dragStartX = 0;
 let dragStartY = 0;
 let initialX = 0;
 let initialY = 0;
-function savePersistence() {
-  localStorage.setItem("selected_skills", JSON.stringify(Array.from(activeSkillIds)));
-  localStorage.setItem("selected_engines", JSON.stringify(Array.from(selectedEngineIds)));
-}
-// Init Search Engines
-function initEngines() {
-  enginesTop.innerHTML = "";
-  enginesBottom.innerHTML = "";
-  const allEngines = Object.entries(engines);
-  allEngines.forEach(([id, engine], index) => {
-    const a = document.createElement("a");
-    a.id = `engine-${id}`;
-    a.className = "engine-link disabled";
-    if (selectedEngineIds.has(id)) a.classList.add("selected");
-    a.href = "";
-    a.title = engine.label;
-    a.tabIndex = index === 0 ? 0 : -1;
-    a.innerHTML = `<img src="${engine.icon}" alt="${engine.label}">`;
-    a.addEventListener("click", (e) => {
-      e.preventDefault();
-      a.classList.toggle("selected");
-      if (a.classList.contains("selected")) {
-        selectedEngineIds.add(id);
-      } else {
-        selectedEngineIds.delete(id);
-      }
-      savePersistence();
-    });
-    a.addEventListener("keydown", (e) => {
-      if (e.key === "ArrowRight") {
-        e.preventDefault();
-        const next = a.nextElementSibling || (a.parentElement === enginesTop ? enginesBottom.firstElementChild : null);
-        next?.focus();
-      } else if (e.key === "ArrowLeft") {
-        e.preventDefault();
-        const prev = a.previousElementSibling || (a.parentElement === enginesBottom ? enginesTop.lastElementChild : null);
-        prev?.focus();
-      } else if (e.key === "ArrowDown") {
-        e.preventDefault();
-        const container = a.parentElement === enginesTop ? enginesBottom : null;
-        if (container) {
-          const idx = Array.from(enginesTop.children).indexOf(a);
-          const target = container.children[idx] || container.lastElementChild;
-          target?.focus();
-        }
-      } else if (e.key === "ArrowUp") {
-        e.preventDefault();
-        const container = a.parentElement === enginesBottom ? enginesTop : null;
-        if (container) {
-          const idx = Array.from(enginesBottom.children).indexOf(a);
-          const target = container.children[idx] || container.lastElementChild;
-          target?.focus();
-        } else {
-          searchInput.focus();
-        }
-      } else if (e.key === " ") {
-        e.preventDefault();
-        a.click();
-      } else if (e.key === "Enter" && !e.metaKey && !e.ctrlKey) {
-        e.preventDefault();
-        handleOpen();
-      } else if (e.key === "Escape") {
-        e.preventDefault();
-        searchInput.focus();
-      }
-    });
-    const targetRow = engine.position === "bottom" ? enginesBottom : enginesTop;
-    targetRow.appendChild(a);
-  });
-}
-async function handleOpen() {
-  const rawQuery = searchInput.value.trim();
-  if (!rawQuery) return;
-  saveToHistory(rawQuery);
-  const selectedEngines = Array.from(document.querySelectorAll(".engine-link.selected"));
-  const active = document.activeElement;
-  let targetEngines = selectedEngines;
-  if (targetEngines.length === 0 && active && active.classList.contains("engine-link")) {
-    targetEngines = [active];
-  }
-  if (targetEngines.length === 0) return;
-  // Get combined skills prompt
-  let skillsPrompt = "";
-  if (activeSkillIds.size > 0) {
-    const skillsData = await Promise.all(
-      Array.from(activeSkillIds).map(async (id) => {
-        try {
-          const [bm] = await chrome.bookmarks.get(id);
-          return decode({ name: bm.title, url: bm.url || "" });
-        } catch (e) {
-          return null;
-        }
-      })
-    );
-    skillsPrompt = skillsData.map((s) => s?.content?.trim()).filter(Boolean).join("\n-----\n");
-  }
-  const processEngine = (id) => {
-    const engine = engines[id];
-    let query = rawQuery;
-    if (engine.position === "bottom" && skillsPrompt) {
-      query = `${skillsPrompt}
------
-${rawQuery}`;
-    }
-    return engine.search(query);
-  };
-  if (targetEngines.length === 1) {
-    const id = targetEngines[0].id.replace("engine-", "");
-    const url = processEngine(id);
-    console.log("handleOpen: single engine redirecting to", url);
-    setTimeout(() => {
-      window.location.href = url;
-    }, 100);
-  } else {
-    targetEngines.forEach((el) => {
-      const id = el.id.replace("engine-", "");
-      const url = processEngine(id);
-      chrome.tabs.create({ url, active: false });
-    });
-  }
-}
-function resizeSearch() {
-  searchInput.style.height = "auto";
-  searchInput.style.height = searchInput.scrollHeight + "px";
-}
-searchInput.addEventListener("input", () => {
-  resizeSearch();
-  localStorage.setItem("search_query", searchInput.value);
-  searchClear.classList.toggle("hidden", !searchInput.value);
-  const query = searchInput.value.trim();
-  Object.entries(engines).forEach(([id, engine]) => {
-    const a = document.getElementById(`engine-${id}`);
-    if (query) {
-      a.classList.remove("disabled");
-      a.href = engine.search(query);
-    } else {
-      a.classList.add("disabled");
-      a.href = "";
-    }
-  });
-});
-searchClear.addEventListener("click", () => {
-  searchInput.value = "";
-  localStorage.removeItem("search_query");
-  searchClear.classList.add("hidden");
-  resizeSearch();
-  searchInput.dispatchEvent(new Event("input"));
-  searchInput.focus();
-});
-const searchGo = document.getElementById("search-go");
-searchGo.addEventListener("click", (e) => {
-  e.preventDefault();
-  handleOpen();
-});
-// Global Cmd+Enter and Navigation
-window.addEventListener("keydown", (e) => {
-  if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
-    e.preventDefault();
-    e.stopPropagation();
-    handleOpen();
-  }
-}, true);
-searchInput.addEventListener("keydown", (e) => {
-  if (e.key === "ArrowDown" && searchInput.selectionStart === searchInput.value.length) {
-    if (searchInput.value.trim()) {
-      e.preventDefault();
-      const firstEngine = enginesTop.querySelector(".engine-link:not(.disabled)");
-      if (firstEngine) firstEngine.focus();
-    }
-  }
-});
 // Bookmark Management
 async function getFolder() {
   if (currentFolderId) return currentFolderId;
@@ -282,24 +105,15 @@ async function loadData() {
     localStorage.setItem("icon_cache_hash", iconUrls);
   }
   gridContainer.innerHTML = "";
-  skillsList.innerHTML = "";
-  const bookmarks = [];
-  const skills = [];
   items.forEach((item) => {
     try {
       const data = decode({ name: item.title, url: item.url || "" });
-      if (data.type === "skill") {
-        skills.push(item);
-      } else {
-        bookmarks.push(item);
+      if (data.type !== "skill") {
+        renderBookmark(item);
       }
     } catch (e) {
     }
   });
-  bookmarks.forEach(renderBookmark);
-  skills.forEach((bm, i) => renderSkill(bm, i === 0));
-  // Refresh disabled state for engines
-  searchInput.dispatchEvent(new Event("input"));
 }
 function renderBookmark(bm) {
   const data = decode({ name: bm.title, url: bm.url || "" });
@@ -335,45 +149,6 @@ function renderBookmark(bm) {
     removeBookmark(bm.id);
   });
   gridContainer.appendChild(a);
-}
-function renderSkill(bm, isFirst) {
-  const data = decode({ name: bm.title, url: bm.url || "" });
-  const btn = document.createElement("button");
-  btn.className = "skill-btn";
-  if (activeSkillIds.has(bm.id)) btn.classList.add("active");
-  btn.textContent = data.title || "";
-  btn.tabIndex = isFirst ? 0 : -1;
-  btn.addEventListener("click", () => {
-    if (activeSkillIds.has(bm.id)) {
-      activeSkillIds.delete(bm.id);
-    } else {
-      activeSkillIds.add(bm.id);
-    }
-    savePersistence();
-    const idx = Array.from(skillsList.children).indexOf(btn);
-    loadData().then(() => {
-      const nextBtn = skillsList.children[idx];
-      nextBtn?.focus();
-    });
-  });
-  btn.addEventListener("keydown", (e) => {
-    if (e.key === "ArrowRight" || e.key === "ArrowDown") {
-      e.preventDefault();
-      btn.nextElementSibling?.focus();
-    } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
-      e.preventDefault();
-      btn.previousElementSibling?.focus();
-    } else if (e.key === "ArrowUp" && !btn.previousElementSibling) {
-      e.preventDefault();
-      const firstEngine = enginesTop.querySelector(".engine-link:not(.disabled)");
-      if (firstEngine) firstEngine.focus();
-    }
-  });
-  btn.addEventListener("focus", () => {
-    Array.from(skillsList.children).forEach((c) => c.tabIndex = -1);
-    btn.tabIndex = 0;
-  });
-  skillsList.appendChild(btn);
 }
 // Drag & Drop
 function startDrag(e) {
@@ -420,16 +195,6 @@ editToggle.addEventListener("click", () => {
   document.body.classList.toggle("edit-mode", isEditMode);
   editToggle.classList.toggle("active", isEditMode);
   addBtn.classList.toggle("hidden", !isEditMode);
-  addSkillBtn.classList.toggle("hidden", !isEditMode);
-  clearCacheBtn.classList.toggle("hidden", !isEditMode);
-});
-// Clear Cache
-clearCacheBtn.addEventListener("click", async () => {
-  if ("caches" in window) {
-    await caches.delete("images");
-    localStorage.removeItem("icon_cache_hash");
-    console.log("Image cache cleared.");
-  }
 });
 // Bookmark Dialog
 addBtn.addEventListener("click", () => {
@@ -479,172 +244,212 @@ bookmarkForm.addEventListener("submit", async (e) => {
   bookmarkDialog.close();
   loadData();
 });
-// Skills Management
-addSkillBtn.addEventListener("click", async () => {
-  await renderSkillsManager();
-  skillsDialog.showModal();
-});
-closeSkillsBtn.addEventListener("click", () => skillsDialog.close());
-async function renderSkillsManager() {
-  const folderId = await getFolder();
-  const items = await chrome.bookmarks.getChildren(folderId);
-  skillsManagerList.innerHTML = "";
-  items.forEach((item) => {
+const wallpaperEl = document.getElementById("wallpaper");
+const wpSettingsOpenBtn = document.getElementById("wallpaper-settings-open");
+const wpReloadBtn = document.getElementById("wallpaper-reload");
+const wpDialog = document.getElementById("wallpaper-dialog");
+const wpDialogCloseBtn = document.getElementById("wallpaper-dialog-close");
+const brightnessInput = document.getElementById("brightness");
+const saturationInput = document.getElementById("saturation");
+const contrastInput = document.getElementById("contrast");
+const brightnessEnabledCb = document.getElementById("brightnessEnabled");
+const saturationEnabledCb = document.getElementById("saturationEnabled");
+const contrastEnabledCb = document.getElementById("contrastEnabled");
+const brightnessValueEl = document.getElementById("brightnessValue");
+const saturationValueEl = document.getElementById("saturationValue");
+const contrastValueEl = document.getElementById("contrastValue");
+const animationEnabledCb = document.getElementById("animationEnabled");
+const animationSpeedInput = document.getElementById("animationSpeed");
+const animationSpeedValueEl = document.getElementById("animationSpeedValue");
+function todayString(d = /* @__PURE__ */ new Date()) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+/**
+ * Checks whether a saved timestamp or date string belongs to today (local time).
+ * Returns true if both match the current calendar day, false otherwise.
+ */
+function isSameDay(savedTime, savedDate) {
+  const today = todayString();
+  if (savedDate && savedDate === today) {
+    return true;
+  }
+  if (savedTime) {
+    const ms = Number(savedTime);
+    if (isNaN(ms)) {
+      const parsed = new Date(savedTime);
+      if (isNaN(parsed.getTime())) {
+        return false;
+      }
+      return todayString(parsed) === today;
+    }
+    if (ms > 0) {
+      return todayString(new Date(ms)) === today;
+    }
+  }
+  return false;
+}
+/**
+ * Extracts average color from the wallpaper image using an offscreen canvas
+ * and applies it to --backgroundColor on the root element.
+ */
+function updateBackgroundColorFromImage(url) {
+  const img = new Image();
+  img.crossOrigin = "Anonymous";
+  img.onload = () => {
     try {
-      const data = decode({ name: item.title, url: item.url || "" });
-      if (data.type === "skill") {
-        const row = document.createElement("div");
-        row.className = "skill-manager-row";
-        if (currentSkillId === item.id) row.classList.add("active");
-        row.innerHTML = `
-                    <div class="skill-info">${data.title || ""}</div>
-                    <div class="skill-row-actions">
-                        <button class="action-btn btn-edit" title="Edit">e</button>
-                        <button class="action-btn btn-del" title="Delete">x</button>
-                    </div>
-                `;
-        const info = row.querySelector(".skill-info");
-        info.onclick = () => {
-          currentSkillId = item.id;
-          editSkill(item);
-          renderSkillsManager();
-        };
-        row.querySelector(".btn-edit").addEventListener("click", (e) => {
-          e.stopPropagation();
-          currentSkillId = item.id;
-          editSkill(item);
-          renderSkillsManager();
-        });
-        row.querySelector(".btn-del").addEventListener("click", (e) => {
-          e.stopPropagation();
-          if (confirm("Delete this skill?")) {
-            chrome.bookmarks.remove(item.id, () => {
-              if (currentSkillId === item.id) {
-                currentSkillId = null;
-                skillForm.reset();
-                skillContent.style.height = "auto";
-              }
-              activeSkillIds.delete(item.id);
-              savePersistence();
-              renderSkillsManager();
-              loadData();
-            });
-          }
-        });
-        skillsManagerList.appendChild(row);
+      const canvas = document.createElement("canvas");
+      canvas.width = 1;
+      canvas.height = 1;
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        ctx.drawImage(img, 0, 0, 1, 1);
+        const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
+        const color = `rgb(${r}, ${g}, ${b})`;
+        document.documentElement.style.setProperty("--backgroundColor", color);
+        localStorage.setItem("wallpaper_bg_color", color);
       }
     } catch (e) {
+      console.warn("Could not extract image color:", e);
     }
-  });
-}
-function editSkill(bm) {
-  const data = decode({ name: bm.title, url: bm.url || "" });
-  skillForm.elements.namedItem("title").value = data.title || "";
-  skillContent.value = data.content || "";
-  // Auto-expand
-  skillContent.style.height = "auto";
-  skillContent.style.height = skillContent.scrollHeight + "px";
-}
-newSkillBtn.addEventListener("click", () => {
-  currentSkillId = null;
-  skillForm.reset();
-  skillContent.style.height = "auto";
-  // Reset height
-  renderSkillsManager();
-});
-skillContent.addEventListener("input", () => {
-  skillContent.style.height = "auto";
-  skillContent.style.height = skillContent.scrollHeight + "px";
-});
-skillForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const fd = new FormData(skillForm);
-  const folderId = await getFolder();
-  const data = {
-    type: "skill",
-    title: fd.get("title") || "",
-    content: fd.get("content") || ""
   };
-  const { name, url } = serialize(data);
-  if (currentSkillId) {
-    await chrome.bookmarks.update(currentSkillId, { title: name, url });
-  } else {
-    await chrome.bookmarks.create({ parentId: folderId, title: name, url });
-  }
-  renderSkillsManager();
-  loadData();
-});
-// History logic
-function saveToHistory(prompt) {
-  if (!prompt || !prompt.trim()) return;
-  const KEY = "chrome_homepage_history_v2";
-  let history = JSON.parse(localStorage.getItem(KEY) || "[]");
-  history = history.filter((p) => p !== prompt);
-  history.unshift(prompt);
-  if (history.length > 10) history.pop();
-  localStorage.setItem(KEY, JSON.stringify(history));
+  img.src = url;
 }
-function renderHistory() {
-  const KEY = "chrome_homepage_history_v2";
-  const history = JSON.parse(localStorage.getItem(KEY) || "[]");
-  historyList.innerHTML = "";
-  if (history.length === 0) {
-    historyList.innerHTML = '<div style="padding: 1rem; color: #94a3b8; font-size: 0.85rem;">No history yet</div>';
-    historyPreview.textContent = "";
+/**
+ * Generates a fresh seeded picsum URL and follows HTTP redirect to obtain the
+ * final static image URL (e.g. fastly.picsum.photos/id/...).
+ * Using a seed and storing the resolved URL ensures the image remains identical across reloads.
+ */
+async function getFreshImage() {
+  const seed = Date.now().toString(36) + Math.random().toString(36).substring(2, 7);
+  const seededUrl = `https://picsum.photos/seed/${seed}/1920/1080`;
+  try {
+    const response = await fetch(seededUrl);
+    if (response.ok && response.url) {
+      console.log("[Wallpaper] Resolved final static image URL:", response.url);
+      return response.url;
+    }
+  } catch (e) {
+    console.warn("[Wallpaper] Fetch failed, fallback to seeded URL:", e);
+  }
+  return seededUrl;
+}
+function applyWallpaperUrl(url) {
+  const now = /* @__PURE__ */ new Date();
+  console.log("[Wallpaper] Applying:", url, "at", now.toISOString());
+  wallpaperEl.style.backgroundImage = `url("${url}")`;
+  localStorage.setItem("wallpaper_url", url);
+  localStorage.setItem("wallpaper_time", now.getTime().toString());
+  localStorage.setItem("wallpaper_date", todayString(now));
+  updateBackgroundColorFromImage(url);
+}
+async function initWallpaper() {
+  const cachedUrl = localStorage.getItem("wallpaper_url");
+  const cachedTime = localStorage.getItem("wallpaper_time");
+  const cachedDate = localStorage.getItem("wallpaper_date");
+  const sameDay = isSameDay(cachedTime, cachedDate);
+  const isCleanCachedUrl = Boolean(cachedUrl && !cachedUrl.includes("?random="));
+  console.log("[Wallpaper] Stored date:", cachedDate, "stored time:", cachedTime, "today:", todayString(), "sameDay:", sameDay, "isClean:", isCleanCachedUrl);
+  if (isCleanCachedUrl && sameDay) {
+    // Same day — reuse cached URL, no network request needed
+    console.log("[Wallpaper] Reusing cached URL for today:", cachedUrl);
+    wallpaperEl.style.backgroundImage = `url("${cachedUrl}")`;
+    const cachedBgColor = localStorage.getItem("wallpaper_bg_color");
+    if (cachedBgColor) {
+      document.documentElement.style.setProperty("--backgroundColor", cachedBgColor);
+    }
+    updateBackgroundColorFromImage(cachedUrl);
     return;
   }
-  history.forEach((prompt, index) => {
-    const item = document.createElement("div");
-    item.className = "history-item";
-    item.innerHTML = `
-            <div class="history-item-text">${prompt}</div>
-            <button class="use-btn">use</button>
-        `;
-    item.onclick = () => {
-      Array.from(historyList.children).forEach((c) => c.classList.remove("active"));
-      item.classList.add("active");
-      historyPreview.textContent = prompt;
-    };
-    item.querySelector(".use-btn").addEventListener("click", (e) => {
-      e.stopPropagation();
-      searchInput.value = prompt;
-      searchInput.dispatchEvent(new Event("input"));
-      resizeSearch();
-      if (historyPopover.hidePopover) {
-        historyPopover.hidePopover();
-      }
-      searchInput.focus();
-    });
-    historyList.appendChild(item);
-    if (index === 0) {
-      item.click();
-    }
-  });
+  // New day (or first run) — fetch a fresh image
+  console.log("[Wallpaper] New day or first run — fetching fresh image");
+  const freshUrl = await getFreshImage();
+  applyWallpaperUrl(freshUrl);
 }
-historyPopover.addEventListener("toggle", (e) => {
-  if (e.newState === "open") {
-    renderHistory();
+function loadWallpaperSettings() {
+  const brightness = localStorage.getItem("wp_brightness");
+  const brightnessOn = localStorage.getItem("wp_brightness_on");
+  const saturation = localStorage.getItem("wp_saturation");
+  const saturationOn = localStorage.getItem("wp_saturation_on");
+  const contrast = localStorage.getItem("wp_contrast");
+  const contrastOn = localStorage.getItem("wp_contrast_on");
+  const animOn = localStorage.getItem("wp_anim_on");
+  const animSpeed = localStorage.getItem("wp_anim_speed");
+  if (brightness !== null) brightnessInput.value = brightness;
+  if (brightnessOn !== null) brightnessEnabledCb.checked = brightnessOn === "1";
+  if (saturation !== null) saturationInput.value = saturation;
+  if (saturationOn !== null) saturationEnabledCb.checked = saturationOn === "1";
+  if (contrast !== null) contrastInput.value = contrast;
+  if (contrastOn !== null) contrastEnabledCb.checked = contrastOn === "1";
+  if (animOn !== null) animationEnabledCb.checked = animOn === "1";
+  if (animSpeed !== null) animationSpeedInput.value = animSpeed;
+}
+function saveWallpaperSettings() {
+  localStorage.setItem("wp_brightness", brightnessInput.value);
+  localStorage.setItem("wp_brightness_on", brightnessEnabledCb.checked ? "1" : "0");
+  localStorage.setItem("wp_saturation", saturationInput.value);
+  localStorage.setItem("wp_saturation_on", saturationEnabledCb.checked ? "1" : "0");
+  localStorage.setItem("wp_contrast", contrastInput.value);
+  localStorage.setItem("wp_contrast_on", contrastEnabledCb.checked ? "1" : "0");
+  localStorage.setItem("wp_anim_on", animationEnabledCb.checked ? "1" : "0");
+  localStorage.setItem("wp_anim_speed", animationSpeedInput.value);
+}
+function updateFilters() {
+  const filters = [];
+  if (brightnessEnabledCb.checked) {
+    filters.push(`brightness(${brightnessInput.value}%)`);
+  }
+  if (saturationEnabledCb.checked) {
+    filters.push(`saturate(${saturationInput.value}%)`);
+  }
+  if (contrastEnabledCb.checked) {
+    filters.push(`contrast(${contrastInput.value}%)`);
+  }
+  wallpaperEl.style.filter = filters.join(" ");
+  brightnessValueEl.textContent = `${brightnessInput.value}%`;
+  saturationValueEl.textContent = `${saturationInput.value}%`;
+  contrastValueEl.textContent = `${contrastInput.value}%`;
+  saveWallpaperSettings();
+}
+function updateAnimation() {
+  const duration = `${animationSpeedInput.value}s`;
+  animationSpeedValueEl.textContent = duration;
+  wallpaperEl.style.animationDuration = duration;
+  wallpaperEl.style.animationPlayState = animationEnabledCb.checked ? "running" : "paused";
+  saveWallpaperSettings();
+}
+brightnessInput.addEventListener("input", updateFilters);
+saturationInput.addEventListener("input", updateFilters);
+contrastInput.addEventListener("input", updateFilters);
+brightnessEnabledCb.addEventListener("change", updateFilters);
+saturationEnabledCb.addEventListener("change", updateFilters);
+contrastEnabledCb.addEventListener("change", updateFilters);
+animationEnabledCb.addEventListener("change", updateAnimation);
+animationSpeedInput.addEventListener("input", updateAnimation);
+wpSettingsOpenBtn.addEventListener("click", () => {
+  wpDialog.showModal();
+});
+wpDialogCloseBtn.addEventListener("click", () => {
+  wpDialog.close();
+});
+wpDialog.addEventListener("click", (e) => {
+  if (e.target === wpDialog) {
+    wpDialog.close();
   }
 });
+wpReloadBtn.addEventListener("click", async () => {
+  console.log("[Wallpaper] Manual reload triggered");
+  const freshUrl = await getFreshImage();
+  applyWallpaperUrl(freshUrl);
+});
+// Restore persisted filter/animation settings into form controls
+loadWallpaperSettings();
+// Apply filters and animation from (possibly restored) control values
+updateFilters();
+updateAnimation();
+// Load wallpaper (cached for today or fresh on new day)
+initWallpaper();
 // Start
-initEngines();
 loadData();
-// Restore search
-const savedQuery = localStorage.getItem("search_query");
-if (savedQuery) {
-  searchInput.value = savedQuery;
-  searchClear.classList.toggle("hidden", !savedQuery);
-}
-resizeSearch();
-// Shrink behavior
-gridContainer.addEventListener("mousedown", (e) => {
-  if (e.target === gridContainer || e.target.closest(".bookmark")) {
-    searchInput.classList.add("shrunk");
-  }
-});
-searchInput.addEventListener("focus", () => {
-  if (searchInput.classList.contains("shrunk")) {
-    searchInput.classList.remove("shrunk");
-    resizeSearch();
-  }
-});

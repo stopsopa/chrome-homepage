@@ -20,8 +20,12 @@ self.addEventListener("fetch", (event: any) => {
 
   const url = new URL(request.url);
 
-  // Only intercept HTTP/HTTPS image requests
-  if (request.destination === "image" && (url.protocol === "http:" || url.protocol === "https:")) {
+  // Only intercept HTTP/HTTPS image requests.
+  // Skip picsum.photos — it responds with a 302 redirect that the SW
+  // cannot cache or return cleanly; let the browser handle it natively.
+  const isPicsum = url.hostname === "picsum.photos" || url.hostname.endsWith(".picsum.photos");
+
+  if (request.destination === "image" && (url.protocol === "http:" || url.protocol === "https:") && !isPicsum) {
     event.respondWith(
       (async () => {
         const clientId = event.clientId;

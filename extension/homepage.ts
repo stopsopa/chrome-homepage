@@ -5,7 +5,6 @@
 }
 @es.ts */
 import { serialize, decode } from './modules.js';
-import engines from './search.js';
 import type { Bookmark } from './types.js';
 
 declare const chrome: any;
@@ -35,241 +34,42 @@ if ('serviceWorker' in navigator) {
     });
 }
 
-const searchInput = document.getElementById('search-input') as HTMLTextAreaElement;
-const searchClear = document.getElementById('search-clear') as HTMLButtonElement;
-const enginesTop = document.getElementById('engines-top') as HTMLElement;
-const enginesBottom = document.getElementById('engines-bottom') as HTMLElement;
-const skillsList = document.getElementById('skills-list') as HTMLElement;
 const editToggle = document.getElementById('edit-toggle') as HTMLButtonElement;
 const gridContainer = document.getElementById('grid-container') as HTMLElement;
-
 const addBtn = document.getElementById('add-bookmark') as HTMLButtonElement;
-const addSkillBtn = document.getElementById('add-skill') as HTMLButtonElement;
-const clearCacheBtn = document.getElementById('clear-cache') as HTMLButtonElement;
-
 const bookmarkDialog = document.getElementById('bookmark-dialog') as HTMLDialogElement;
 const bookmarkForm = document.getElementById('bookmark-form') as HTMLFormElement;
 const dialogCancel = document.getElementById('dialog-cancel') as HTMLButtonElement;
-
-const skillsDialog = document.getElementById('skills-dialog') as HTMLDialogElement;
-const skillsManagerList = document.getElementById('skills-manager-list') as HTMLElement;
-const skillForm = document.getElementById('skill-form') as HTMLFormElement;
-const newSkillBtn = document.getElementById('new-skill-btn') as HTMLButtonElement;
-const skillContent = document.getElementById('skill-content') as HTMLTextAreaElement;
-
-const closeSkillsBtn = document.getElementById('close-skills-btn') as HTMLButtonElement;
-const historyList = document.getElementById('history-list') as HTMLElement;
-const historyPreview = document.getElementById('history-preview') as HTMLElement;
-const historyPopover = document.getElementById('history-popover') as any;
-const historyBtn = document.getElementById('history-btn') as HTMLButtonElement;
+const headerPanel = document.getElementById('header-panel') as HTMLElement;
+const headerToggle = document.getElementById('header-toggle') as HTMLButtonElement;
+const headerHide = document.getElementById('header-hide') as HTMLButtonElement;
 
 let isEditMode = false;
 let currentFolderId: string | null = null;
 let currentEditId: string | null = null;
-let currentSkillId: string | null = null;
 
-// Persistence
-let activeSkillIds = new Set<string>(JSON.parse(localStorage.getItem('selected_skills') || '[]'));
-let selectedEngineIds = new Set<string>(JSON.parse(localStorage.getItem('selected_engines') || '[]'));
+/* Show the floating header panel */
+headerToggle.addEventListener('click', () => {
+    headerPanel.classList.remove('hidden');
+});
+
+/* Hide the floating header panel */
+headerHide.addEventListener('click', () => {
+    headerPanel.classList.add('hidden');
+    // Also exit edit mode when hiding
+    if (isEditMode) {
+        isEditMode = false;
+        document.body.classList.remove('edit-mode');
+        editToggle.classList.remove('active');
+        addBtn.classList.add('hidden');
+    }
+});
 
 let dragElement: HTMLElement | null = null;
 let dragStartX = 0;
 let dragStartY = 0;
 let initialX = 0;
 let initialY = 0;
-
-function savePersistence() {
-    localStorage.setItem('selected_skills', JSON.stringify(Array.from(activeSkillIds)));
-    localStorage.setItem('selected_engines', JSON.stringify(Array.from(selectedEngineIds)));
-}
-
-// Init Search Engines
-function initEngines() {
-    enginesTop.innerHTML = '';
-    enginesBottom.innerHTML = '';
-    
-    const allEngines = Object.entries(engines);
-    allEngines.forEach(([id, engine]: [string, any], index) => {
-        const a = document.createElement('a');
-        a.id = `engine-${id}`;
-        a.className = 'engine-link disabled';
-        if (selectedEngineIds.has(id)) a.classList.add('selected');
-        a.href = '';
-        a.title = engine.label;
-        a.tabIndex = index === 0 ? 0 : -1;
-        a.innerHTML = `<img src="${engine.icon}" alt="${engine.label}">`;
-        
-        a.addEventListener('click', (e) => {
-            e.preventDefault();
-            a.classList.toggle('selected');
-            if (a.classList.contains('selected')) {
-                selectedEngineIds.add(id);
-            } else {
-                selectedEngineIds.delete(id);
-            }
-            savePersistence();
-        });
-
-        a.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowRight') {
-                e.preventDefault();
-                const next = (a.nextElementSibling as HTMLElement) || (a.parentElement === enginesTop ? enginesBottom.firstElementChild : null);
-                next?.focus();
-            } else if (e.key === 'ArrowLeft') {
-                e.preventDefault();
-                const prev = (a.previousElementSibling as HTMLElement) || (a.parentElement === enginesBottom ? enginesTop.lastElementChild : null);
-                prev?.focus();
-            } else if (e.key === 'ArrowDown') {
-                e.preventDefault();
-                const container = a.parentElement === enginesTop ? enginesBottom : null;
-                if (container) {
-                    const idx = Array.from(enginesTop.children).indexOf(a);
-                    const target = container.children[idx] || container.lastElementChild;
-                    (target as HTMLElement)?.focus();
-                }
-            } else if (e.key === 'ArrowUp') {
-                e.preventDefault();
-                const container = a.parentElement === enginesBottom ? enginesTop : null;
-                if (container) {
-                    const idx = Array.from(enginesBottom.children).indexOf(a);
-                    const target = container.children[idx] || container.lastElementChild;
-                    (target as HTMLElement)?.focus();
-                } else {
-                    searchInput.focus();
-                }
-            } else if (e.key === ' ') {
-                e.preventDefault();
-                a.click();
-            } else if (e.key === 'Enter' && !e.metaKey && !e.ctrlKey) {
-                e.preventDefault();
-                handleOpen();
-            } else if (e.key === 'Escape') {
-                e.preventDefault();
-                searchInput.focus();
-            }
-        });
-
-        const targetRow = engine.position === 'bottom' ? enginesBottom : enginesTop;
-        targetRow.appendChild(a);
-    });
-}
-
-async function handleOpen() {
-    const rawQuery = searchInput.value.trim();
-    if (!rawQuery) return;
-
-    saveToHistory(rawQuery);
-
-    const selectedEngines = Array.from(document.querySelectorAll('.engine-link.selected')) as HTMLElement[];
-    const active = document.activeElement as HTMLElement;
-    let targetEngines = selectedEngines;
-    
-    if (targetEngines.length === 0 && active && active.classList.contains('engine-link')) {
-        targetEngines = [active];
-    }
-
-    if (targetEngines.length === 0) return;
-
-    // Get combined skills prompt
-    let skillsPrompt = '';
-    if (activeSkillIds.size > 0) {
-        const skillsData = await Promise.all(
-            Array.from(activeSkillIds).map(async (id) => {
-                try {
-                    const [bm] = await chrome.bookmarks.get(id);
-                    return decode({ name: bm.title, url: bm.url || '' }) as Bookmark;
-                } catch (e) {
-                    return null;
-                }
-            })
-        );
-        skillsPrompt = skillsData
-            .map(s => s?.content?.trim())
-            .filter(Boolean)
-            .join('\n-----\n');
-    }
-
-    const processEngine = (id: string) => {
-        const engine = (engines as any)[id];
-        let query = rawQuery;
-        if (engine.position === 'bottom' && skillsPrompt) {
-            query = `${skillsPrompt}\n-----\n${rawQuery}`;
-        }
-        return engine.search(query);
-    };
-
-    if (targetEngines.length === 1) {
-        const id = targetEngines[0].id.replace('engine-', '');
-        const url = processEngine(id);
-        console.log('handleOpen: single engine redirecting to', url);
-        setTimeout(() => {
-            window.location.href = url;
-        }, 100);
-    } else {
-        targetEngines.forEach((el) => {
-            const id = el.id.replace('engine-', '');
-            const url = processEngine(id);
-            chrome.tabs.create({ url, active: false });
-        });
-    }
-}
-
-function resizeSearch() {
-    searchInput.style.height = 'auto';
-    searchInput.style.height = searchInput.scrollHeight + 'px';
-}
-
-searchInput.addEventListener('input', () => {
-    resizeSearch();
-    localStorage.setItem('search_query', searchInput.value);
-    searchClear.classList.toggle('hidden', !searchInput.value);
-
-    const query = searchInput.value.trim();
-    Object.entries(engines).forEach(([id, engine]: [string, any]) => {
-        const a = document.getElementById(`engine-${id}`) as HTMLAnchorElement;
-        if (query) {
-            a.classList.remove('disabled');
-            a.href = engine.search(query);
-        } else {
-            a.classList.add('disabled');
-            a.href = '';
-        }
-    });
-});
-
-searchClear.addEventListener('click', () => {
-    searchInput.value = '';
-    localStorage.removeItem('search_query');
-    searchClear.classList.add('hidden');
-    resizeSearch();
-    searchInput.dispatchEvent(new Event('input'));
-    searchInput.focus();
-});
-
-const searchGo = document.getElementById('search-go') as HTMLButtonElement;
-searchGo.addEventListener('click', (e) => {
-    e.preventDefault();
-    handleOpen();
-});
-
-// Global Cmd+Enter and Navigation
-window.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault();
-        e.stopPropagation();
-        handleOpen();
-    }
-}, true);
-
-searchInput.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowDown' && searchInput.selectionStart === searchInput.value.length) {
-        if (searchInput.value.trim()) {
-            e.preventDefault();
-            const firstEngine = enginesTop.querySelector('.engine-link:not(.disabled)') as HTMLElement;
-            if (firstEngine) firstEngine.focus();
-        }
-    }
-});
 
 // Bookmark Management
 async function getFolder() {
@@ -305,7 +105,7 @@ async function getFolder() {
 async function loadData() {
     const folderId = await getFolder();
     const items = await chrome.bookmarks.getChildren(folderId);
-    
+
     // Cache flushing logic
     const iconUrls = items.map((item: any) => {
         try {
@@ -325,27 +125,15 @@ async function loadData() {
     }
 
     gridContainer.innerHTML = '';
-    skillsList.innerHTML = '';
-    
-    const bookmarks: any[] = [];
-    const skills: any[] = [];
 
     items.forEach((item: any) => {
         try {
             const data = decode({ name: item.title, url: item.url || '' }) as Bookmark;
-            if (data.type === 'skill') {
-                skills.push(item);
-            } else {
-                bookmarks.push(item);
+            if (data.type !== 'skill') {
+                renderBookmark(item);
             }
         } catch (e) {}
     });
-
-    bookmarks.forEach(renderBookmark);
-    skills.forEach((bm, i) => renderSkill(bm, i === 0));
-    
-    // Refresh disabled state for engines
-    searchInput.dispatchEvent(new Event('input'));
 }
 
 function renderBookmark(bm: any) {
@@ -368,7 +156,7 @@ function renderBookmark(bm: any) {
     `;
 
     a.addEventListener('mousedown', startDrag);
-    a.addEventListener('click', (e) => { 
+    a.addEventListener('click', (e) => {
         if (isEditMode) {
             e.preventDefault();
         }
@@ -384,58 +172,13 @@ function renderBookmark(bm: any) {
     gridContainer.appendChild(a);
 }
 
-function renderSkill(bm: any, isFirst: boolean) {
-    const data = decode({ name: bm.title, url: bm.url || '' }) as Bookmark;
-    const btn = document.createElement('button');
-    btn.className = 'skill-btn';
-    if (activeSkillIds.has(bm.id)) btn.classList.add('active');
-    btn.textContent = data.title || '';
-    btn.tabIndex = isFirst ? 0 : -1;
-    
-    btn.addEventListener('click', () => {
-        if (activeSkillIds.has(bm.id)) {
-            activeSkillIds.delete(bm.id);
-        } else {
-            activeSkillIds.add(bm.id);
-        }
-        savePersistence();
-        
-        const idx = Array.from(skillsList.children).indexOf(btn);
-        loadData().then(() => {
-            const nextBtn = skillsList.children[idx] as HTMLElement;
-            nextBtn?.focus();
-        });
-    });
-
-    btn.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
-            e.preventDefault();
-            (btn.nextElementSibling as HTMLElement)?.focus();
-        } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
-            e.preventDefault();
-            (btn.previousElementSibling as HTMLElement)?.focus();
-        } else if (e.key === 'ArrowUp' && !btn.previousElementSibling) {
-            e.preventDefault();
-            const firstEngine = enginesTop.querySelector('.engine-link:not(.disabled)') as HTMLElement;
-            if (firstEngine) firstEngine.focus();
-        }
-    });
-
-    btn.addEventListener('focus', () => {
-        Array.from(skillsList.children).forEach(c => (c as HTMLElement).tabIndex = -1);
-        btn.tabIndex = 0;
-    });
-
-    skillsList.appendChild(btn);
-}
-
 // Drag & Drop
 function startDrag(e: MouseEvent) {
     if (!isEditMode) return;
     const target = e.target as HTMLElement;
     if (!target.closest('.bookmark-icon')) return;
     if (target.closest('.bookmark-actions')) return;
-    
+
     e.preventDefault();
     dragElement = (e.currentTarget as HTMLElement);
     dragStartX = e.clientX;
@@ -481,17 +224,6 @@ editToggle.addEventListener('click', () => {
     document.body.classList.toggle('edit-mode', isEditMode);
     editToggle.classList.toggle('active', isEditMode);
     addBtn.classList.toggle('hidden', !isEditMode);
-    addSkillBtn.classList.toggle('hidden', !isEditMode);
-    clearCacheBtn.classList.toggle('hidden', !isEditMode);
-});
-
-// Clear Cache
-clearCacheBtn.addEventListener('click', async () => {
-    if ('caches' in window) {
-        await caches.delete('images');
-        localStorage.removeItem('icon_cache_hash');
-        console.log('Image cache cleared.');
-    }
 });
 
 // Bookmark Dialog
@@ -523,13 +255,13 @@ bookmarkForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const fd = new FormData(bookmarkForm);
     const folderId = await getFolder();
-    let data: Bookmark = { 
-        type: 'link', 
-        title: (fd.get('title') as string) || '', 
-        logo: (fd.get('logo') as string) || '', 
-        url: (fd.get('url') as string) || '' 
+    let data: Bookmark = {
+        type: 'link',
+        title: (fd.get('title') as string) || '',
+        logo: (fd.get('logo') as string) || '',
+        url: (fd.get('url') as string) || ''
     };
-    
+
     if (currentEditId) {
         const [bm] = await chrome.bookmarks.get(currentEditId);
         const old = decode({ name: bm.title, url: bm.url || '' }) as Bookmark;
@@ -545,198 +277,325 @@ bookmarkForm.addEventListener('submit', async (e) => {
     loadData();
 });
 
-// Skills Management
-addSkillBtn.addEventListener('click', async () => {
-    await renderSkillsManager();
-    skillsDialog.showModal();
-});
 
-closeSkillsBtn.addEventListener('click', () => skillsDialog.close());
+/*
+ * ============================================================
+ * WALLPAPER
+ *
+ * localStorage keys used:
+ *   wallpaper_url        — cached image URL (picsum)
+ *   wallpaper_date       — "YYYY-MM-DD" of when image was last fetched
+ *   wallpaper_time       — ISO timestamp string of when image was last fetched
+ *   wallpaper_bg_color   — extracted rgb(...) background color
+ *   wp_brightness        — range value 0-200
+ *   wp_brightness_on     — "1" / "0"
+ *   wp_saturation        — range value 0-200
+ *   wp_saturation_on     — "1" / "0"
+ *   wp_contrast          — range value 0-200
+ *   wp_contrast_on       — "1" / "0"
+ *   wp_anim_on           — "1" / "0"
+ *   wp_anim_speed        — seconds string e.g. "30"
+ * ============================================================
+ */
 
-async function renderSkillsManager() {
-    const folderId = await getFolder();
-    const items = await chrome.bookmarks.getChildren(folderId);
-    skillsManagerList.innerHTML = '';
-    
-    items.forEach((item: any) => {
-        try {
-            const data = decode({ name: item.title, url: item.url || '' }) as Bookmark;
-            if (data.type === 'skill') {
-                const row = document.createElement('div');
-                row.className = 'skill-manager-row';
-                if (currentSkillId === item.id) row.classList.add('active');
-                
-                row.innerHTML = `
-                    <div class="skill-info">${data.title || ''}</div>
-                    <div class="skill-row-actions">
-                        <button class="action-btn btn-edit" title="Edit">e</button>
-                        <button class="action-btn btn-del" title="Delete">x</button>
-                    </div>
-                `;
+const wallpaperEl         = document.getElementById('wallpaper') as HTMLElement;
+const wpSettingsOpenBtn   = document.getElementById('wallpaper-settings-open') as HTMLButtonElement;
+const wpReloadBtn         = document.getElementById('wallpaper-reload') as HTMLButtonElement;
+const wpDialog            = document.getElementById('wallpaper-dialog') as HTMLDialogElement;
+const wpDialogCloseBtn    = document.getElementById('wallpaper-dialog-close') as HTMLButtonElement;
 
-                const info = row.querySelector('.skill-info') as HTMLElement;
-                info.onclick = () => {
-                    currentSkillId = item.id;
-                    editSkill(item);
-                    renderSkillsManager();
-                };
+const brightnessInput     = document.getElementById('brightness') as HTMLInputElement;
+const saturationInput     = document.getElementById('saturation') as HTMLInputElement;
+const contrastInput       = document.getElementById('contrast') as HTMLInputElement;
+const brightnessEnabledCb = document.getElementById('brightnessEnabled') as HTMLInputElement;
+const saturationEnabledCb = document.getElementById('saturationEnabled') as HTMLInputElement;
+const contrastEnabledCb   = document.getElementById('contrastEnabled') as HTMLInputElement;
+const brightnessValueEl   = document.getElementById('brightnessValue') as HTMLElement;
+const saturationValueEl   = document.getElementById('saturationValue') as HTMLElement;
+const contrastValueEl     = document.getElementById('contrastValue') as HTMLElement;
 
-                row.querySelector('.btn-edit')!.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    currentSkillId = item.id;
-                    editSkill(item);
-                    renderSkillsManager();
-                });
+const animationEnabledCb    = document.getElementById('animationEnabled') as HTMLInputElement;
+const animationSpeedInput   = document.getElementById('animationSpeed') as HTMLInputElement;
+const animationSpeedValueEl = document.getElementById('animationSpeedValue') as HTMLElement;
 
-                row.querySelector('.btn-del')!.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    if (confirm('Delete this skill?')) {
-                        chrome.bookmarks.remove(item.id, () => {
-                            if (currentSkillId === item.id) {
-                                currentSkillId = null;
-                                skillForm.reset();
-                                skillContent.style.height = 'auto';
-                            }
-                            activeSkillIds.delete(item.id);
-                            savePersistence();
-                            renderSkillsManager();
-                            loadData();
-                        });
-                    }
-                });
-
-                skillsManagerList.appendChild(row);
-            }
-        } catch (e) {}
-    });
+/*
+ * Returns given or today's date as a "YYYY-MM-DD" string in local time.
+ * Used to detect whether we have crossed midnight and need a fresh image.
+ */
+function todayString(d: Date = new Date()): string {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
 }
 
-function editSkill(bm: any) {
-    const data = decode({ name: bm.title, url: bm.url || '' }) as Bookmark;
-    (skillForm.elements.namedItem('title') as HTMLInputElement).value = data.title || '';
-    skillContent.value = data.content || '';
-    
-    // Auto-expand
-    skillContent.style.height = 'auto';
-    skillContent.style.height = skillContent.scrollHeight + 'px';
-}
-
-newSkillBtn.addEventListener('click', () => {
-    currentSkillId = null;
-    skillForm.reset();
-    skillContent.style.height = 'auto'; // Reset height
-    renderSkillsManager();
-});
-
-skillContent.addEventListener('input', () => {
-    skillContent.style.height = 'auto';
-    skillContent.style.height = skillContent.scrollHeight + 'px';
-});
-
-skillForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const fd = new FormData(skillForm);
-    const folderId = await getFolder();
-    const data: Bookmark = { 
-        type: 'skill', 
-        title: (fd.get('title') as string) || '', 
-        content: (fd.get('content') as string) || ''
-    };
-    const { name, url } = serialize(data);
-
-    if (currentSkillId) {
-        await chrome.bookmarks.update(currentSkillId, { title: name, url });
-    } else {
-        await chrome.bookmarks.create({ parentId: folderId, title: name, url });
+/**
+ * Checks whether a saved timestamp or date string belongs to today (local time).
+ * Returns true if both match the current calendar day, false otherwise.
+ */
+function isSameDay(savedTime: string | null, savedDate: string | null): boolean {
+    const today = todayString();
+    if (savedDate && savedDate === today) {
+        return true;
     }
-    renderSkillsManager();
-    loadData();
-});
-
-// History logic
-function saveToHistory(prompt: string) {
-    if (!prompt || !prompt.trim()) return;
-    const KEY = 'chrome_homepage_history_v2';
-    let history = JSON.parse(localStorage.getItem(KEY) || '[]');
-    history = history.filter((p: string) => p !== prompt);
-    history.unshift(prompt);
-    if (history.length > 10) history.pop();
-    localStorage.setItem(KEY, JSON.stringify(history));
+    if (savedTime) {
+        const ms = Number(savedTime);
+        if (isNaN(ms)) {
+            const parsed = new Date(savedTime);
+            if (isNaN(parsed.getTime())) {
+                return false;
+            }
+            return todayString(parsed) === today;
+        }
+        if (ms > 0) {
+            return todayString(new Date(ms)) === today;
+        }
+    }
+    return false;
 }
 
-function renderHistory() {
-    const KEY = 'chrome_homepage_history_v2';
-    const history = JSON.parse(localStorage.getItem(KEY) || '[]');
-    historyList.innerHTML = '';
-    
-    if (history.length === 0) {
-        historyList.innerHTML = '<div style="padding: 1rem; color: #94a3b8; font-size: 0.85rem;">No history yet</div>';
-        historyPreview.textContent = '';
+/**
+ * Extracts average color from the wallpaper image using an offscreen canvas
+ * and applies it to --backgroundColor on the root element.
+ */
+function updateBackgroundColorFromImage(url: string): void {
+    const img = new Image();
+    img.crossOrigin = 'Anonymous';
+    img.onload = () => {
+        try {
+            const canvas = document.createElement('canvas');
+            canvas.width = 1;
+            canvas.height = 1;
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+                ctx.drawImage(img, 0, 0, 1, 1);
+                const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
+                const color = `rgb(${r}, ${g}, ${b})`;
+                document.documentElement.style.setProperty('--backgroundColor', color);
+                localStorage.setItem('wallpaper_bg_color', color);
+            }
+        } catch (e) {
+            console.warn('Could not extract image color:', e);
+        }
+    };
+    img.src = url;
+}
+
+/**
+ * Generates a fresh seeded picsum URL and follows HTTP redirect to obtain the
+ * final static image URL (e.g. fastly.picsum.photos/id/...).
+ * Using a seed and storing the resolved URL ensures the image remains identical across reloads.
+ */
+async function getFreshImage(): Promise<string> {
+    const seed = Date.now().toString(36) + Math.random().toString(36).substring(2, 7);
+    const seededUrl = `https://picsum.photos/seed/${seed}/1920/1080`;
+    try {
+        const response = await fetch(seededUrl);
+        if (response.ok && response.url) {
+            console.log('[Wallpaper] Resolved final static image URL:', response.url);
+            return response.url;
+        }
+    } catch (e) {
+        console.warn('[Wallpaper] Fetch failed, fallback to seeded URL:', e);
+    }
+    return seededUrl;
+}
+
+/*
+ * Applies the given URL to the wallpaper element as a CSS background-image
+ * and persists both the URL, timestamp, and today's date to localStorage.
+ */
+function applyWallpaperUrl(url: string): void {
+    const now = new Date();
+    console.log('[Wallpaper] Applying:', url, 'at', now.toISOString());
+    wallpaperEl.style.backgroundImage = `url("${url}")`;
+    localStorage.setItem('wallpaper_url', url);
+    localStorage.setItem('wallpaper_time', now.getTime().toString());
+    localStorage.setItem('wallpaper_date', todayString(now));
+    updateBackgroundColorFromImage(url);
+}
+
+/*
+ * Decides whether to reuse the cached URL (same day) or fetch a fresh image.
+ *
+ * A fresh image is loaded when:
+ *   - no URL is cached yet, OR
+ *   - the cached date/time is before today (new day detected after midnight).
+ */
+async function initWallpaper(): Promise<void> {
+    const cachedUrl  = localStorage.getItem('wallpaper_url');
+    const cachedTime = localStorage.getItem('wallpaper_time');
+    const cachedDate = localStorage.getItem('wallpaper_date');
+
+    const sameDay = isSameDay(cachedTime, cachedDate);
+    const isCleanCachedUrl = Boolean(cachedUrl && !cachedUrl.includes('?random='));
+    console.log('[Wallpaper] Stored date:', cachedDate, 'stored time:', cachedTime, 'today:', todayString(), 'sameDay:', sameDay, 'isClean:', isCleanCachedUrl);
+
+    if (isCleanCachedUrl && sameDay) {
+        // Same day — reuse cached URL, no network request needed
+        console.log('[Wallpaper] Reusing cached URL for today:', cachedUrl);
+        wallpaperEl.style.backgroundImage = `url("${cachedUrl}")`;
+        const cachedBgColor = localStorage.getItem('wallpaper_bg_color');
+        if (cachedBgColor) {
+            document.documentElement.style.setProperty('--backgroundColor', cachedBgColor);
+        }
+        updateBackgroundColorFromImage(cachedUrl!);
         return;
     }
 
-    history.forEach((prompt: string, index: number) => {
-        const item = document.createElement('div');
-        item.className = 'history-item';
-        item.innerHTML = `
-            <div class="history-item-text">${prompt}</div>
-            <button class="use-btn">use</button>
-        `;
-        
-        item.onclick = () => {
-            Array.from(historyList.children).forEach(c => c.classList.remove('active'));
-            item.classList.add('active');
-            historyPreview.textContent = prompt;
-        };
-        
-        item.querySelector('.use-btn')!.addEventListener('click', (e) => {
-            e.stopPropagation();
-            searchInput.value = prompt;
-            searchInput.dispatchEvent(new Event('input'));
-            resizeSearch();
-            if (historyPopover.hidePopover) {
-                historyPopover.hidePopover();
-            }
-            searchInput.focus();
-        });
-        
-        historyList.appendChild(item);
-        
-        if (index === 0) {
-            item.click();
-        }
-    });
+    // New day (or first run) — fetch a fresh image
+    console.log('[Wallpaper] New day or first run — fetching fresh image');
+    const freshUrl = await getFreshImage();
+    applyWallpaperUrl(freshUrl);
 }
 
-historyPopover.addEventListener("toggle", (e: any) => {
-  if (e.newState === "open") {
-    renderHistory();
-  }
+/*
+ * ============================================================
+ * WALLPAPER SETTINGS — localStorage persistence helpers
+ * ============================================================
+ */
+
+/*
+ * Reads all filter/animation settings from localStorage and
+ * restores them into the form controls.
+ */
+function loadWallpaperSettings(): void {
+    const brightness   = localStorage.getItem('wp_brightness');
+    const brightnessOn = localStorage.getItem('wp_brightness_on');
+    const saturation   = localStorage.getItem('wp_saturation');
+    const saturationOn = localStorage.getItem('wp_saturation_on');
+    const contrast     = localStorage.getItem('wp_contrast');
+    const contrastOn   = localStorage.getItem('wp_contrast_on');
+    const animOn       = localStorage.getItem('wp_anim_on');
+    const animSpeed    = localStorage.getItem('wp_anim_speed');
+
+    if (brightness   !== null) brightnessInput.value = brightness;
+    if (brightnessOn !== null) brightnessEnabledCb.checked = brightnessOn === '1';
+    if (saturation   !== null) saturationInput.value = saturation;
+    if (saturationOn !== null) saturationEnabledCb.checked = saturationOn === '1';
+    if (contrast     !== null) contrastInput.value = contrast;
+    if (contrastOn   !== null) contrastEnabledCb.checked = contrastOn === '1';
+    if (animOn       !== null) animationEnabledCb.checked = animOn === '1';
+    if (animSpeed    !== null) animationSpeedInput.value = animSpeed;
+}
+
+/* Saves current form control values to localStorage. */
+function saveWallpaperSettings(): void {
+    localStorage.setItem('wp_brightness',    brightnessInput.value);
+    localStorage.setItem('wp_brightness_on', brightnessEnabledCb.checked ? '1' : '0');
+    localStorage.setItem('wp_saturation',    saturationInput.value);
+    localStorage.setItem('wp_saturation_on', saturationEnabledCb.checked ? '1' : '0');
+    localStorage.setItem('wp_contrast',      contrastInput.value);
+    localStorage.setItem('wp_contrast_on',   contrastEnabledCb.checked ? '1' : '0');
+    localStorage.setItem('wp_anim_on',       animationEnabledCb.checked ? '1' : '0');
+    localStorage.setItem('wp_anim_speed',    animationSpeedInput.value);
+}
+
+/*
+ * ============================================================
+ * FILTERS
+ * ============================================================
+ */
+
+function updateFilters(): void {
+    const filters: string[] = [];
+
+    if (brightnessEnabledCb.checked) {
+        filters.push(`brightness(${brightnessInput.value}%)`);
+    }
+    if (saturationEnabledCb.checked) {
+        filters.push(`saturate(${saturationInput.value}%)`);
+    }
+    if (contrastEnabledCb.checked) {
+        filters.push(`contrast(${contrastInput.value}%)`);
+    }
+
+    wallpaperEl.style.filter = filters.join(' ');
+
+    brightnessValueEl.textContent  = `${brightnessInput.value}%`;
+    saturationValueEl.textContent  = `${saturationInput.value}%`;
+    contrastValueEl.textContent    = `${contrastInput.value}%`;
+
+    saveWallpaperSettings();
+}
+
+/*
+ * ============================================================
+ * ANIMATION
+ *
+ * The slider controls the duration of one COMPLETE cycle.
+ *
+ * Example:
+ *   10s = zoom in + zoom out every 10 seconds
+ *   30s = zoom in + zoom out every 30 seconds
+ *
+ * The zoom amount is always 6%.
+ * ============================================================
+ */
+
+function updateAnimation(): void {
+    const duration = `${animationSpeedInput.value}s`;
+
+    animationSpeedValueEl.textContent = duration;
+    wallpaperEl.style.animationDuration = duration;
+    wallpaperEl.style.animationPlayState = animationEnabledCb.checked ? 'running' : 'paused';
+
+    saveWallpaperSettings();
+}
+
+/* EVENTS — filters */
+brightnessInput.addEventListener('input',     updateFilters);
+saturationInput.addEventListener('input',     updateFilters);
+contrastInput.addEventListener('input',       updateFilters);
+brightnessEnabledCb.addEventListener('change', updateFilters);
+saturationEnabledCb.addEventListener('change', updateFilters);
+contrastEnabledCb.addEventListener('change',   updateFilters);
+
+/* EVENTS — animation */
+animationEnabledCb.addEventListener('change',  updateAnimation);
+animationSpeedInput.addEventListener('input',   updateAnimation);
+
+/* EVENTS — wallpaper settings dialog open / close */
+wpSettingsOpenBtn.addEventListener('click', () => {
+    wpDialog.showModal();
 });
+
+wpDialogCloseBtn.addEventListener('click', () => {
+    wpDialog.close();
+});
+
+/* Close dialog when clicking the backdrop */
+wpDialog.addEventListener('click', (e) => {
+    if (e.target === wpDialog) {
+        wpDialog.close();
+    }
+});
+
+/*
+ * Manual wallpaper reload — fetches a fresh image regardless of date,
+ * and updates localStorage so the date resets to today.
+ */
+wpReloadBtn.addEventListener('click', async () => {
+    console.log('[Wallpaper] Manual reload triggered');
+    const freshUrl = await getFreshImage();
+    applyWallpaperUrl(freshUrl);
+});
+
+/*
+ * ============================================================
+ * INITIAL STATE
+ * ============================================================
+ */
+
+// Restore persisted filter/animation settings into form controls
+loadWallpaperSettings();
+
+// Apply filters and animation from (possibly restored) control values
+updateFilters();
+updateAnimation();
+
+// Load wallpaper (cached for today or fresh on new day)
+initWallpaper();
 
 // Start
-initEngines();
 loadData();
-
-// Restore search
-const savedQuery = localStorage.getItem('search_query');
-if (savedQuery) {
-    searchInput.value = savedQuery;
-    searchClear.classList.toggle('hidden', !savedQuery);
-}
-
-resizeSearch();
-
-// Shrink behavior
-gridContainer.addEventListener('mousedown', (e) => {
-    if (e.target === gridContainer || (e.target as HTMLElement).closest('.bookmark')) {
-        searchInput.classList.add('shrunk');
-    }
-});
-
-searchInput.addEventListener('focus', () => {
-    if (searchInput.classList.contains('shrunk')) {
-        searchInput.classList.remove('shrunk');
-        resizeSearch();
-    }
-});

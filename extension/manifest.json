@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Custom New Tab Mangement v2",
-  "version": "0.1",
+  "version": "0.2",
   "description": "Renders a custom local new tab page.",
   "chrome_url_overrides": {
     "newtab": "homepage.html"
@@ -9,20 +9,14 @@
   "background": {
     "service_worker": "sw.js"
   },
-  "permissions": ["bookmarks", "tabs", "scripting"],
+  "permissions": ["bookmarks"],
   "host_permissions": [
-    "https://gemini.google.com/*",
-    "https://chatgpt.com/*",
-    "https://claude.ai/*",
-    "https://t3.chat/*"
+    "https://picsum.photos/*",
+    "https://fastly.picsum.photos/*"
   ],
-  "content_scripts": [
-    {
-      "matches": ["https://gemini.google.com/*", "https://chatgpt.com/*", "https://claude.ai/*", "https://t3.chat/*"],
-      "js": ["content.js"],
-      "run_at": "document_end"
-    }
-  ],
+  "content_security_policy": {
+    "extension_pages": "default-src 'self'; connect-src 'self' https://picsum.photos https://fastly.picsum.photos; img-src 'self' https: data:; script-src 'self'; style-src 'self'"
+  },
   "icons": {
     "128": "images/icon128.png"
   }
