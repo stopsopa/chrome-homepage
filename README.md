@@ -16,3 +16,4 @@ Created out of a lack of trust in publicly available extensions and the realizat
 ## More sophisticated version
 
 [https://chromewebstore.google.com/detail/custom-new-tab-mangement/jjhljniamhmpiicifiaaihnmhooafegp](https://chromewebstore.google.com/detail/custom-new-tab-mangement/jjhljniamhmpiicifiaaihnmhooafegp)
+This one allows you to define set of custom icons/links and stores them entirely in the regular bookmarks in the chromium
