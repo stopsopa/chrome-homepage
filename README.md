@@ -12,3 +12,7 @@ Created out of a lack of trust in publicly available extensions and the realizat
 ## Chrome Web Store
 
 [https://chromewebstore.google.com/detail/custom-new-tab-redirect/phenpbfhfgcghknjgmdlkekpigfaaobe](https://chromewebstore.google.com/detail/custom-new-tab-redirect/phenpbfhfgcghknjgmdlkekpigfaaobe)
+
+## More sophisticated version
+
+[https://chromewebstore.google.com/detail/custom-new-tab-mangement/jjhljniamhmpiicifiaaihnmhooafegp](https://chromewebstore.google.com/detail/custom-new-tab-mangement/jjhljniamhmpiicifiaaihnmhooafegp)
