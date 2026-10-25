@@ -9,6 +9,13 @@
   "background": {
     "service_worker": "sw.js"
   },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "128": "images/icon128.png"
+    },
+    "default_title": "Custom New Tab Mangement v2"
+  },
   "permissions": ["bookmarks"],
   "host_permissions": ["https://picsum.photos/*", "https://fastly.picsum.photos/*"],
   "content_security_policy": {

@@ -1,65 +1,91 @@
 <!doctype html>
-<html>
+<html lang="en">
   <head>
-    <style>
-      body {
-        font-family:
-          system-ui,
-          -apple-system,
-          sans-serif;
-        padding: 15px;
-        width: 280px;
-        margin: 0;
-        background-color: #fafafa;
-      }
-      h3 {
-        margin-top: 0;
-        margin-bottom: 15px;
-        color: #333;
-        font-size: 16px;
-      }
-      input {
-        width: 100%;
-        box-sizing: border-box;
-        margin-bottom: 12px;
-        padding: 8px 10px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        font-size: 14px;
-      }
-      input:focus {
-        outline: none;
-        border-color: #007bff;
-        box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
-      }
-      button {
-        width: 100%;
-        padding: 8px;
-        cursor: pointer;
-        background-color: #007bff;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        font-size: 14px;
-        font-weight: 500;
-      }
-      button:hover {
-        background-color: #0056b3;
-      }
-      .status {
-        color: #28a745;
-        display: none;
-        margin-top: 10px;
-        font-size: 13px;
-        text-align: center;
-      }
-    </style>
+    <meta charset="utf-8" />
+    <title>Custom New Tab Management v2</title>
+    <link rel="stylesheet" href="popup.css" />
   </head>
   <body>
-    <h3>Set New Tab URL</h3>
-    <input type="url" id="linkInput" placeholder="https://example.com" />
-    <button id="saveBtn">Save URL</button>
-    <div id="status" class="status">Saved successfully!</div>
-    <script src="popup.js"></script>
+    <div class="popup-container">
+      <header class="popup-header">
+        <img class="app-icon" src="images/icon128.png" alt="App Icon" />
+        <div class="app-info">
+          <h1 class="app-title">Custom New Tab</h1>
+          <span class="app-version">v0.3</span>
+        </div>
+      </header>
+
+      <nav class="links-list">
+        <a
+          href="https://chromewebstore.google.com/detail/custom-new-tab-mangement/jjhljniamhmpiicifiaaihnmhooafegp"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="link-item"
+          data-testid="popup-link-cws"
+        >
+          <div class="icon-wrap cws-icon">
+            <svg viewBox="0 0 32 32" width="22" height="22">
+              <circle cx="16" cy="16" r="14" fill="#ffffff" />
+              <path d="M16 2a14 14 0 0 1 12.12 7H16a7 7 0 0 0-6.06 3.5L5.07 5.64A14 14 0 0 1 16 2z" fill="#EA4335" />
+              <path d="M28.12 9A14 14 0 0 1 22.06 29.07L16 18.57A7 7 0 0 0 22.06 15h6.06z" fill="#FBBC05" />
+              <path d="M22.06 29.07A14 14 0 0 1 3.88 5.64l4.87 8.43A7 7 0 0 0 16 23.57l6.06 5.5z" fill="#34A853" />
+              <circle cx="16" cy="16" r="6" fill="#ffffff" />
+              <circle cx="16" cy="16" r="4.8" fill="#1A73E8" />
+            </svg>
+          </div>
+          <div class="link-text">
+            <span class="link-title">Chrome Web Store</span>
+            <span class="link-sub">Rate, review & share</span>
+          </div>
+          <span class="link-arrow">&rsaquo;</span>
+        </a>
+
+        <a
+          href="https://github.com/stopsopa/chrome-homepage"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="link-item"
+          data-testid="popup-link-github"
+        >
+          <div class="icon-wrap github-icon">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="#24292f">
+              <path
+                fill-rule="evenodd"
+                clip-rule="evenodd"
+                d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+              />
+            </svg>
+          </div>
+          <div class="link-text">
+            <span class="link-title">GitHub Repository</span>
+            <span class="link-sub">Source code & docs</span>
+          </div>
+          <span class="link-arrow">&rsaquo;</span>
+        </a>
+
+        <a
+          href="https://youtu.be/1M98DR0YXp8"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="link-item"
+          data-testid="popup-link-youtube"
+        >
+          <div class="icon-wrap youtube-icon">
+            <svg viewBox="0 0 24 24" width="22" height="22">
+              <path
+                d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z"
+                fill="#FF0000"
+              />
+              <path d="M9.545 15.568V8.432L15.818 12l-6.273 3.568z" fill="#FFFFFF" />
+            </svg>
+          </div>
+          <div class="link-text">
+            <span class="link-title">YouTube Tutorial</span>
+            <span class="link-sub">How to use</span>
+          </div>
+          <span class="link-arrow">&rsaquo;</span>
+        </a>
+      </nav>
+    </div>
   </body>
 </html>
