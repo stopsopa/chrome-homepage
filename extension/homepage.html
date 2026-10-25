@@ -12,10 +12,20 @@
             --link-color: #1a73e8;
             --link-hover: #174ea6;
             --border-color: #dadce0;
-            --button-bg: #ffffff;
-            --button-border: #dadce0;
-            --button-text: #3c4043;
-            --button-hover-bg: #f1f3f4;
+            --button-primary-bg: #1a73e8;
+            --button-primary-hover: #1557b0;
+            --button-secondary-bg: #ffffff;
+            --button-secondary-border: #dadce0;
+            --button-secondary-text: #3c4043;
+            --button-secondary-hover: #f1f3f4;
+            --success-color: #28a745;
+            --error-color: #dc3545;
+            --promo-bg: #f8fafd;
+            --promo-border: #d2e3fc;
+            --promo-badge-bg: #e8f0fe;
+            --promo-badge-text: #1a73e8;
+            --yt-color: #d93025;
+            --yt-hover: #b31412;
             --card-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
             --font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
@@ -43,43 +53,133 @@
             box-sizing: border-box;
         }
 
-        .promo-message {
-            font-size: 16px;
-            line-height: 1.6;
+        .redirect-header {
+            font-size: 17px;
+            font-weight: 500;
             color: var(--text-primary);
-            margin: 0 0 24px 0;
-            word-break: break-word;
+            margin-bottom: 6px;
+            word-break: break-all;
+            line-height: 1.5;
         }
 
-        .promo-message a {
+        .target-link {
             color: var(--link-color);
             text-decoration: none;
-            font-weight: 500;
+            font-weight: 600;
         }
 
-        .promo-message a:hover {
+        .target-link:hover {
             text-decoration: underline;
             color: var(--link-hover);
         }
 
         .countdown-box {
-            margin: 20px 0 24px 0;
             font-size: 15px;
             color: var(--text-secondary);
+            margin-bottom: 20px;
         }
 
         .countdown-number {
-            font-size: 20px;
+            font-size: 22px;
             font-weight: 700;
             color: var(--link-color);
+        }
+
+        .edit-link-btn {
+            background: none;
+            border: none;
+            color: var(--link-color);
+            font-size: 13px;
+            text-decoration: underline;
+            cursor: pointer;
+            margin-left: 10px;
+            padding: 0;
+            vertical-align: middle;
+        }
+
+        .edit-link-btn:hover {
+            color: var(--link-hover);
+        }
+
+        .promo-card {
+            background-color: var(--promo-bg);
+            border: 1px solid var(--promo-border);
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .promo-badge {
+            display: inline-block;
+            background-color: var(--promo-badge-bg);
+            color: var(--promo-badge-text);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            letter-spacing: 0.3px;
+        }
+
+        .promo-headline {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0 0 10px 0;
+        }
+
+        .promo-action-row {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .promo-item {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .yt-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            color: var(--yt-color);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .yt-link:hover {
+            text-decoration: underline;
+            color: var(--yt-hover);
+        }
+
+        .yt-icon {
+            flex-shrink: 0;
+            vertical-align: middle;
+        }
+
+        .v2-link {
+            color: var(--link-color);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .v2-link:hover {
+            text-decoration: underline;
+            color: var(--link-hover);
         }
 
         .snooze-btn {
             padding: 10px 18px;
             cursor: pointer;
-            background-color: var(--button-bg);
-            color: var(--button-text);
-            border: 1px solid var(--button-border);
+            background-color: var(--button-secondary-bg);
+            color: var(--button-secondary-text);
+            border: 1px solid var(--button-secondary-border);
             border-radius: 6px;
             font-size: 14px;
             font-weight: 500;
@@ -87,21 +187,85 @@
         }
 
         .snooze-btn:hover {
-            background-color: var(--button-hover-bg);
+            background-color: var(--button-secondary-hover);
             border-color: #bdc1c6;
         }
 
-        .no-link-title {
+        .form-title {
             margin-top: 0;
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+        }
+
+        .input-wrapper {
+            position: relative;
+            width: 100%;
+            margin-bottom: 12px;
+        }
+
+        .input-wrapper input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px 32px 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+            background-color: #ffffff;
             color: var(--text-primary);
         }
 
-        .no-link-desc {
+        .input-wrapper input:focus {
+            outline: none;
+            border-color: var(--button-primary-bg);
+            box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.25);
+        }
+
+        .clear-btn {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 2px 6px;
+            font-size: 18px;
             color: var(--text-secondary);
+            border-radius: 50%;
+            display: none;
+            line-height: 1;
+            user-select: none;
+        }
+
+        .clear-btn:hover {
+            color: var(--text-primary);
+            background-color: var(--button-secondary-hover);
+        }
+
+        .primary-btn {
+            width: 100%;
+            padding: 10px 16px;
+            cursor: pointer;
+            background-color: var(--button-primary-bg);
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
             font-size: 14px;
-            margin-bottom: 24px;
+            font-weight: 500;
+            transition: background-color 0.15s ease;
+        }
+
+        .primary-btn:hover {
+            background-color: var(--button-primary-hover);
+        }
+
+        .status {
+            display: none;
+            margin-top: 10px;
+            font-size: 13px;
+            text-align: center;
         }
 
         .divider {
@@ -113,22 +277,72 @@
 </head>
 <body>
     <div id="landingContainer" class="container" style="display: none;">
-        <p class="promo-message">
-            See version 2 of redirect chrome extension <a href="https://chromewebstore.google.com/detail/custom-new-tab-mangement/jjhljniamhmpiicifiaaihnmhooafegp" target="_blank" rel="noopener noreferrer">Custom New Tab Mangement v2</a>, see how to use <a href="https://youtu.be/1M98DR0YXp8" target="_blank" rel="noopener noreferrer">https://youtu.be/1M98DR0YXp8</a>
-        </p>
-        <div class="countdown-box">
-            Redirecting in <span id="countdown" class="countdown-number">3</span> seconds...
+        <div class="redirect-header">
+            Redirecting to <a id="targetLink" class="target-link" href="#" target="_blank" rel="noopener noreferrer"></a>
         </div>
+        <div class="countdown-box">
+            in <span id="countdown" class="countdown-number">3</span> seconds...
+            <button type="button" id="editUrlBtn" class="edit-link-btn" title="Change or clear URL">Change / Clear URL</button>
+        </div>
+
+        <div class="promo-card">
+            <div class="promo-badge">🚀 Upgrade Available</div>
+            <div class="promo-headline">Supercharge your new tab experience with Version 2!</div>
+            <div class="promo-action-row">
+                <div class="promo-item">
+                    <span>See how to use:</span>
+                    <a href="https://youtu.be/1M98DR0YXp8" target="_blank" rel="noopener noreferrer" class="yt-link">
+                        <svg class="yt-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                            <path fill="#FF0000" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z"/>
+                            <path fill="#FFFFFF" d="M9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                        </svg>
+                        <span>Watch tutorial on YouTube</span>
+                    </a>
+                </div>
+                <div class="promo-item">
+                    <span>Get the new version:</span>
+                    <a href="https://chromewebstore.google.com/detail/custom-new-tab-mangement/jjhljniamhmpiicifiaaihnmhooafegp" target="_blank" rel="noopener noreferrer" class="v2-link">
+                        Custom New Tab Mangement v2
+                    </a>
+                </div>
+            </div>
+        </div>
+
         <button id="snoozeBtn" class="snooze-btn">Don't show this for next week</button>
     </div>
 
     <div id="noLinkContainer" class="container" style="display: none;">
-        <h1 class="no-link-title">Custom New Tab Redirect</h1>
-        <p class="no-link-desc">Click the extension icon to set a redirect URL.</p>
+        <h2 class="form-title">Set New Tab URL</h2>
+        <div class="input-wrapper">
+            <input type="url" id="homeLinkInput" placeholder="https://example.com" />
+            <button type="button" id="homeClearBtn" class="clear-btn" title="Clear input" aria-label="Clear input">&times;</button>
+        </div>
+        <button id="homeSaveBtn" class="primary-btn">Save URL</button>
+        <div id="homeStatus" class="status"></div>
         <hr class="divider" />
-        <p class="promo-message">
-            See version 2 of redirect chrome extension <a href="https://chromewebstore.google.com/detail/custom-new-tab-mangement/jjhljniamhmpiicifiaaihnmhooafegp" target="_blank" rel="noopener noreferrer">Custom New Tab Mangement v2</a>, see how to use <a href="https://youtu.be/1M98DR0YXp8" target="_blank" rel="noopener noreferrer">https://youtu.be/1M98DR0YXp8</a>
-        </p>
+        
+        <div class="promo-card">
+            <div class="promo-badge">🚀 Upgrade Available</div>
+            <div class="promo-headline">Supercharge your new tab experience with Version 2!</div>
+            <div class="promo-action-row">
+                <div class="promo-item">
+                    <span>See how to use:</span>
+                    <a href="https://youtu.be/1M98DR0YXp8" target="_blank" rel="noopener noreferrer" class="yt-link">
+                        <svg class="yt-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                            <path fill="#FF0000" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z"/>
+                            <path fill="#FFFFFF" d="M9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                        </svg>
+                        <span>Watch tutorial on YouTube</span>
+                    </a>
+                </div>
+                <div class="promo-item">
+                    <span>Get the new version:</span>
+                    <a href="https://chromewebstore.google.com/detail/custom-new-tab-mangement/jjhljniamhmpiicifiaaihnmhooafegp" target="_blank" rel="noopener noreferrer" class="v2-link">
+                        Custom New Tab Mangement v2
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script type="module" src="homepage.js"></script>
