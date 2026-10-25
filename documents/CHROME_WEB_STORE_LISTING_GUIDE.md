@@ -23,6 +23,8 @@ Custom New Tab Management replaces your default new tab with a fast, clean, and 
 
 See how to use: https://youtu.be/1M98DR0YXp8
 
+Old version 1 can be found here: https://chromewebstore.google.com/detail/custom-new-tab-redirect/phenpbfhfgcghknjgmdlkekpigfaaobe
+
 ## Key Features
 
 🔗 **Custom Visual Bookmarks**
