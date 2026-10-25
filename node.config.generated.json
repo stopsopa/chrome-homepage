@@ -1,0 +1,12 @@
+
+  {
+    "$schema": "https://nodejs.org/dist/v24.13.0/docs/node-config-schema.json",
+    "nodeOptions": {
+      "warnings": false
+    },
+    "testRunner": {
+      "test-concurrency": 10,
+      "experimental-test-coverage": true
+    }
+  }
+
