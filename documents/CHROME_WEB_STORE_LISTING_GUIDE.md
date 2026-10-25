@@ -13,32 +13,39 @@ Custom New Tab Dashboard
 #### **Summary** (132 characters max)
 
 ```
-A clean, minimal new tab dashboard to organize bookmarks with drag-and-drop and enjoy customizable dynamic daily wallpapers.
+Private new tab page with custom visual links, daily wallpapers, and zero tracking. Stored purely in your native Chrome bookmarks.
 ```
 
 #### **Description** (16,000 characters max)
 
 ```
-Custom New Tab Dashboard is a high-performance, private start page that centralizes your digital workflow. Replace the generic new tab with a sleek, customizable interface designed for speed and simplicity.
+Custom New Tab Management replaces your default new tab with a fast, clean, and private dashboard tailored to your workflow.
+
+See how to use: https://youtu.be/1M98DR0YXp8
 
 ## Key Features
 
-🔗 **Visual Bookmark Grid**
-- Organize your favorite links on a customizable grid.
+🔗 **Custom Visual Bookmarks**
+- Add and arrange your favorite websites on an open visual grid.
+- Set custom icons using any direct image link (http:// or https://), base64 data:image/... URIs, or a built-in default icon.
+- Built-in helper directory for quick icon discovery across popular repositories.
 - Drag-and-drop reordering with a snap-to-grid system for a neat layout.
-- Edit titles, URLs, and custom logos for a personalized visual experience.
 
-🖼️ **Dynamic Daily Wallpapers**
-- Enjoy beautiful, daily-refreshed wallpaper backgrounds.
-- Built-in wallpaper controls to adjust brightness, saturation, and contrast.
-- Optional subtle wallpaper animation with customizable speed.
-- On-demand reload button to fetch a new background anytime.
+🖼️ **Daily Rotating Wallpapers**
+- Enjoy a fresh, high-resolution background every calendar day.
+- On-demand reload button to fetch and rotate a new background anytime.
+- Built-in controls to adjust brightness, saturation, and contrast.
+- Optional subtle ambient wallpaper zoom animation with adjustable speed.
 - Smart offline caching using IndexedDB to keep page loads instant.
 
-🔒 **Privacy & Data Control**
-- All bookmark data is stored directly in your browser's native bookmarks.
-- Layout settings and wallpaper preferences stay strictly on your local machine.
-- No external trackers, no accounts required, and no user data collection.
+🔒 **Powered 100% by Chrome Bookmarks**
+- All bookmark links, icons, and layout coordinates are stored directly inside your browser's native bookmarks bar.
+- Synced automatically across your devices via your Google Chrome profile with zero proprietary lock-in.
+- Wallpaper preferences and visual filter settings stay strictly on your local machine.
+
+🛡️ **Absolute Privacy — Zero Telemetry**
+- No analytics, no telemetry, no third-party tracking, and no external databases.
+- No account or login required — everything runs strictly on your device.
 
 ## How It Works
 
