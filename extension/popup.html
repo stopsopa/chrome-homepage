@@ -1,53 +1,153 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="utf-8">
     <style>
-        body { 
-            font-family: system-ui, -apple-system, sans-serif; 
-            padding: 15px; 
-            width: 280px; 
-            margin: 0;
-            background-color: #fafafa;
+        :root {
+            --bg-color: #fafafa;
+            --text-color: #333333;
+            --muted-color: #666666;
+            --border-color: #cccccc;
+            --primary-color: #007bff;
+            --primary-hover: #0056b3;
+            --success-color: #28a745;
+            --error-color: #dc3545;
+            --secondary-bg: #f1f3f5;
+            --secondary-hover: #e9ecef;
+            --secondary-text: #495057;
+            --secondary-border: #ced4da;
+            --hr-color: #e0e0e0;
+            --font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
+
+        body { 
+            font-family: var(--font-family); 
+            padding: 16px; 
+            width: 300px; 
+            margin: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            box-sizing: border-box;
+        }
+
         h3 {
             margin-top: 0;
-            margin-bottom: 15px;
-            color: #333;
-            font-size: 16px;
+            margin-bottom: 12px;
+            color: var(--text-color);
+            font-size: 15px;
+            font-weight: 600;
         }
+
         input { 
             width: 100%; 
             box-sizing: border-box; 
-            margin-bottom: 12px; 
+            margin-bottom: 10px; 
             padding: 8px 10px; 
-            border: 1px solid #ccc;
+            border: 1px solid var(--border-color);
             border-radius: 4px;
-            font-size: 14px;
+            font-size: 13px;
+            background-color: #ffffff;
+            color: var(--text-color);
         }
+
         input:focus {
             outline: none;
-            border-color: #007bff;
-            box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
         }
-        button { 
+
+        .primary-btn { 
             width: 100%; 
-            padding: 8px; 
+            padding: 8px 12px; 
             cursor: pointer; 
-            background-color: #007bff;
-            color: white;
+            background-color: var(--primary-color);
+            color: #ffffff;
             border: none;
             border-radius: 4px;
-            font-size: 14px;
+            font-size: 13px;
+            font-weight: 500;
+            transition: background-color 0.15s ease;
+        }
+
+        .primary-btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .status { 
+            color: var(--success-color); 
+            display: none; 
+            margin-top: 8px; 
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .homepage-container {
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .homepage-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 12px;
+            display: inline-block;
+        }
+
+        .homepage-link:hover {
+            text-decoration: underline;
+            color: var(--primary-hover);
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid var(--hr-color);
+            margin: 14px 0;
+        }
+
+        .promo-container {
+            margin-top: 4px;
+        }
+
+        .promo-text {
+            font-size: 12px;
+            line-height: 1.5;
+            color: var(--muted-color);
+            margin: 0 0 10px 0;
+            word-break: break-word;
+        }
+
+        .promo-text a {
+            color: var(--primary-color);
+            text-decoration: none;
             font-weight: 500;
         }
-        button:hover {
-            background-color: #0056b3;
+
+        .promo-text a:hover {
+            text-decoration: underline;
         }
-        .status { 
-            color: #28a745; 
-            display: none; 
-            margin-top: 10px; 
-            font-size: 13px;
+
+        .secondary-btn {
+            width: 100%;
+            padding: 6px 10px;
+            cursor: pointer;
+            background-color: var(--secondary-bg);
+            color: var(--secondary-text);
+            border: 1px solid var(--secondary-border);
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+            transition: background-color 0.15s ease;
+        }
+
+        .secondary-btn:hover {
+            background-color: var(--secondary-hover);
+        }
+
+        .reset-status {
+            color: var(--success-color);
+            display: none;
+            margin-top: 6px;
+            font-size: 11px;
             text-align: center;
         }
     </style>
@@ -55,8 +155,23 @@
 <body>
     <h3>Set New Tab URL</h3>
     <input type="url" id="linkInput" placeholder="https://example.com" />
-    <button id="saveBtn">Save URL</button>
+    <button id="saveBtn" class="primary-btn">Save URL</button>
     <div id="status" class="status">Saved successfully!</div>
-    <script src="popup.js"></script>
+    
+    <div class="homepage-container">
+        <a href="https://chromewebstore.google.com/detail/custom-new-tab-redirect/phenpbfhfgcghknjgmdlkekpigfaaobe" target="_blank" rel="noopener noreferrer" class="homepage-link">Custom New Tab Redirect Homepage</a>
+    </div>
+
+    <hr />
+
+    <div class="promo-container">
+        <p class="promo-text">
+            See version 2 of redirect chrome extension <a href="https://chromewebstore.google.com/detail/custom-new-tab-mangement/jjhljniamhmpiicifiaaihnmhooafegp" target="_blank" rel="noopener noreferrer">Custom New Tab Mangement v2</a>, see how to use <a href="https://youtu.be/1M98DR0YXp8" target="_blank" rel="noopener noreferrer">https://youtu.be/1M98DR0YXp8</a>
+        </p>
+        <button id="resetPromoBtn" class="secondary-btn">Reset to show landing page every 10th load</button>
+        <div id="resetStatus" class="reset-status"></div>
+    </div>
+
+    <script type="module" src="popup.js"></script>
 </body>
 </html>
