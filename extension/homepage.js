@@ -31,6 +31,9 @@ if ("serviceWorker" in navigator) {
     }
   });
 }
+// Default built-in icon used when Logo URL is omitted or empty
+const DEFAULT_ICON = "icons/link-12.svg";
+
 const editToggle = document.getElementById("edit-toggle");
 const gridContainer = document.getElementById("grid-container");
 const addBtn = document.getElementById("add-bookmark");
@@ -40,6 +43,28 @@ const dialogCancel = document.getElementById("dialog-cancel");
 const headerPanel = document.getElementById("header-panel");
 const headerToggle = document.getElementById("header-toggle");
 const headerHide = document.getElementById("header-hide");
+const logoPreviewImg = document.getElementById("logo-preview-img");
+const logoInput = document.getElementById("f-logo");
+
+function updateLogoPreview(value) {
+  if (!logoPreviewImg) return;
+  const val = (value || "").trim();
+  logoPreviewImg.src = val || DEFAULT_ICON;
+}
+
+if (logoPreviewImg) {
+  logoPreviewImg.addEventListener("error", () => {
+    if (!logoPreviewImg.src.endsWith(DEFAULT_ICON)) {
+      logoPreviewImg.src = DEFAULT_ICON;
+    }
+  });
+}
+
+if (logoInput) {
+  logoInput.addEventListener("input", (e) => {
+    updateLogoPreview(e.target.value);
+  });
+}
 let isEditMode = false;
 let currentFolderId = null;
 let currentEditId = null;
@@ -122,6 +147,7 @@ async function loadData() {
 }
 function renderBookmark(bm) {
   const data = decode({ name: bm.title, url: bm.url || "" });
+  const logoUrl = data.logo || DEFAULT_ICON;
   const a = document.createElement("a");
   a.className = "bookmark";
   a.href = bm.url || "";
@@ -130,7 +156,7 @@ function renderBookmark(bm) {
   a.style.left = `${data.x || 100}px`;
   a.style.top = `${data.y || 100}px`;
   a.innerHTML = `
-        <div class="bookmark-icon"><img src="${data.logo || ""}"></div>
+        <div class="bookmark-icon"><img src="${logoUrl}" onerror="if(!this.src.endsWith('${DEFAULT_ICON}'))this.src='${DEFAULT_ICON}'"></div>
         <div class="bookmark-title">${data.title || "No Title"}</div>
         <div class="bookmark-actions">
             <button class="action-btn btn-edit" data-id="${bm.id}">e</button>
@@ -205,6 +231,7 @@ editToggle.addEventListener("click", () => {
 addBtn.addEventListener("click", () => {
   currentEditId = null;
   bookmarkForm.reset();
+  updateLogoPreview("");
   bookmarkDialog.showModal();
 });
 dialogCancel.addEventListener("click", () => bookmarkDialog.close());
@@ -214,7 +241,10 @@ async function openEdit(id) {
   const data = decode({ name: bm.title, url: bm.url || "" });
   bookmarkForm.elements.namedItem("title").value = data.title || "";
   bookmarkForm.elements.namedItem("url").value = bm.url || "";
-  bookmarkForm.elements.namedItem("logo").value = data.logo || "";
+  const isDefaultIcon = !data.logo || data.logo === DEFAULT_ICON;
+  const logoVal = isDefaultIcon ? "" : data.logo;
+  bookmarkForm.elements.namedItem("logo").value = logoVal;
+  updateLogoPreview(data.logo);
   bookmarkDialog.showModal();
 }
 async function removeBookmark(id) {
@@ -227,10 +257,11 @@ bookmarkForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   const fd = new FormData(bookmarkForm);
   const folderId = await getFolder();
+  const rawLogo = (fd.get("logo") || "").toString().trim();
   let data = {
     type: "link",
     title: fd.get("title") || "",
-    logo: fd.get("logo") || "",
+    logo: rawLogo || DEFAULT_ICON,
     url: fd.get("url") || ""
   };
   if (currentEditId) {
@@ -527,6 +558,23 @@ wpReloadBtn.addEventListener("click", async () => {
     applyWallpaper(fresh);
   }
 });
+/**
+ * Loads the external logo helpers HTML file into the bookmark dialog frame.
+ */
+async function loadLogoHelpers() {
+  const container = document.getElementById("logo-helpers-container");
+  if (!container) return;
+  try {
+    const url = chrome.runtime?.getURL ? chrome.runtime.getURL("logo-helpers.html") : "logo-helpers.html";
+    const response = await fetch(url);
+    if (response.ok) {
+      container.innerHTML = await response.text();
+    }
+  } catch (e) {
+    console.warn("Failed to load logo-helpers.html:", e);
+  }
+}
+
 // Restore persisted filter/animation settings into form controls
 loadWallpaperSettings();
 // Apply filters and animation from (possibly restored) control values
@@ -534,5 +582,7 @@ updateFilters();
 updateAnimation();
 // Load wallpaper (cached for today or fresh on new day)
 initWallpaper();
+// Load external logo helpers section
+loadLogoHelpers();
 // Start
 loadData();

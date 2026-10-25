@@ -54,10 +54,23 @@
           <input type="url" id="f-url" name="url" placeholder=" " required />
           <label for="f-url">URL</label>
         </div>
-        <div class="field input-wrapper">
-          <input type="url" id="f-logo" name="logo" placeholder=" " required />
-          <label for="f-logo">Logo URL</label>
+        
+        <!-- Grouped Logo URL section with external icon helper services -->
+        <div class="logo-frame" data-testid="logo-frame">
+          <div class="logo-input-row">
+            <div class="logo-preview-box" data-testid="logo-preview-box">
+              <img id="logo-preview-img" src="icons/link-12.svg" alt="Logo preview" data-testid="logo-preview-img" />
+            </div>
+            <div class="field input-wrapper">
+              <input type="text" id="f-logo" name="logo" placeholder=" " data-testid="bookmark-logo-input" />
+              <label for="f-logo">Logo URL (optional)</label>
+            </div>
+          </div>
+
+          <!-- Dynamically loaded from logo-helpers.html for easy editing -->
+          <div id="logo-helpers-container" data-testid="logo-helpers-container"></div>
         </div>
+
         <footer class="dialog-footer">
           <button type="button" id="dialog-cancel" class="btn-secondary">Cancel</button>
           <button type="submit" class="btn-primary">Submit</button>
